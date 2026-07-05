@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { displaySerif, bodySans } from "./fonts";
+import { BRAND_NAME } from "@/lib/config";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Print Company — Framed Photographic Prints",
-    template: "%s | Print Company",
+    default: `${BRAND_NAME} — Framed Photographic Prints`,
+    template: `%s | ${BRAND_NAME}`,
   },
   description:
     "Limited-edition photographic prints from across India, printed on archival paper and framed by hand.",

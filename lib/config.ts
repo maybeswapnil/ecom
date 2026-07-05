@@ -11,5 +11,5 @@ export const SERVICEABILITY_TIMEOUT_MS = 1500;
 export const SERVICEABILITY_CACHE_HOURS = 24;
 export const TRACKING_SWEEP_HOURS = 6;
 
-export const BRAND_NAME = "Print Company";
+export const BRAND_NAME = "Prints Company";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";

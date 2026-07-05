@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BRAND_NAME } from "@/lib/config";
 
 export const metadata = {
   title: "About",
-  description: "The story behind Print Company — a decade of photographs from across India.",
+  description: `The story behind ${BRAND_NAME} — a decade of photographs from across India.`,
 };
 
 export default function AboutPage() {
@@ -33,9 +34,7 @@ export default function AboutPage() {
         </div>
         <div className="flex-1 max-w-[600px]">
           <p className="font-display text-2xl leading-[1.5] m-0 mb-6.5 text-ink">
-            Print Company started with a single photograph on a friend&rsquo;s wall. She&rsquo;d
-            asked for a copy of a picture I&rsquo;d taken years earlier in Varanasi — an alley, a
-            figure, a shaft of light.
+            {`${BRAND_NAME} started with a single photograph on a friend’s wall. She’d asked for a copy of a picture I’d taken years earlier in Varanasi — an alley, a figure, a shaft of light.`}
           </p>
           <p className="text-base leading-[1.75] text-muted-soft m-0 mb-5.5">
             When I finally saw it printed and framed, it looked nothing like the file on my

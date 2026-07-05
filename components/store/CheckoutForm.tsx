@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore, cartSubtotalPaise } from "@/lib/cart-store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { formatPaise } from "@/lib/money";
-import { FREE_SHIP_THRESHOLD_PAISE, SHIPPING_FLAT_PAISE } from "@/lib/config";
+import { BRAND_NAME, FREE_SHIP_THRESHOLD_PAISE, SHIPPING_FLAT_PAISE } from "@/lib/config";
 import {
   checkoutFormSchema,
   INDIAN_STATE_LIST,
@@ -118,7 +118,7 @@ export function CheckoutForm() {
         amount: data.amount_paise,
         currency: "INR",
         order_id: data.razorpay.order_id,
-        name: "Print Company",
+        name: BRAND_NAME,
         prefill: data.prefill,
         handler: async (response: {
           razorpay_order_id: string;

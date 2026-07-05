@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { BRAND_NAME } from "@/lib/config";
 
 const LINKS = [
   { href: "/admin", label: "Dashboard" },
@@ -25,7 +26,7 @@ export function AdminNav({ email }: { email: string }) {
     <header className="sticky top-0 z-40 bg-paper border-b border-hairline">
       <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between gap-5">
         <div className="flex items-center gap-8">
-          <span className="font-display text-xl font-medium">Print Company · Admin</span>
+          <span className="font-display text-xl font-medium">{BRAND_NAME} · Admin</span>
           <nav className="flex items-center gap-1">
             {LINKS.map((link) => {
               const active =

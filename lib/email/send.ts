@@ -3,7 +3,7 @@ import OrderConfirmationEmail from "@/emails/OrderConfirmation";
 import ShippingConfirmationEmail from "@/emails/ShippingConfirmation";
 import RefundConfirmationEmail from "@/emails/RefundConfirmation";
 import AdminNewOrderEmail from "@/emails/AdminNewOrder";
-import { SITE_URL } from "@/lib/config";
+import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
 type SendResult = { sent: true } | { sent: false; reason: string };
 
@@ -13,7 +13,7 @@ function client(): Resend | null {
   return new Resend(key);
 }
 
-const FROM = process.env.EMAIL_FROM ?? "Print Company <info@swapnilsharma.in>";
+const FROM = process.env.EMAIL_FROM ?? `${BRAND_NAME} <info@swapnilsharma.in>`;
 
 export async function sendOrderConfirmationEmail(params: {
   orderNumber: string;
@@ -29,7 +29,7 @@ export async function sendOrderConfirmationEmail(params: {
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
-    subject: `Order ${params.orderNumber} confirmed — Print Company`,
+    subject: `Order ${params.orderNumber} confirmed — ${BRAND_NAME}`,
     react: OrderConfirmationEmail({
       orderNumber: params.orderNumber,
       receiptUrl: `${SITE_URL}/order/${params.orderNumber}?t=${params.token}`,

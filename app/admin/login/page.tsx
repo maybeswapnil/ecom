@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { BRAND_NAME } from "@/lib/config";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-paper px-6">
       <div className="w-full max-w-[380px]">
-        <div className="font-display text-2xl font-medium text-center mb-8">Print Company</div>
+        <div className="font-display text-2xl font-medium text-center mb-8">{BRAND_NAME}</div>
         <form
           onSubmit={handleSubmit}
           className="border border-hairline bg-surface rounded-xl p-7 flex flex-col gap-4"

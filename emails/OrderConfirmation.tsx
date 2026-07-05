@@ -1,4 +1,5 @@
 import { Body, Container, Head, Heading, Html, Preview, Section, Text } from "@react-email/components";
+import { BRAND_NAME } from "@/lib/config";
 
 type Props = {
   orderNumber: string;
@@ -18,7 +19,7 @@ export default function OrderConfirmationEmail({
   return (
     <Html>
       <Head />
-      <Preview>Order {orderNumber} confirmed — Print Company</Preview>
+      <Preview>Order {orderNumber} confirmed — {BRAND_NAME}</Preview>
       <Body style={{ backgroundColor: "#F7F4ED", fontFamily: "Georgia, serif" }}>
         <Container style={{ padding: "32px 24px", maxWidth: 560 }}>
           <Heading style={{ fontSize: 28, color: "#1C1915" }}>Thank you for your order.</Heading>

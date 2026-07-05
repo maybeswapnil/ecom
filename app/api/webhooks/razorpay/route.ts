@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyWebhookSignature } from "@/lib/razorpay";
 import { sendOrderConfirmationForOrder } from "@/lib/email/order-confirmation";
-import { sendAdminNewOrderEmail, sendRefundConfirmationEmail } from "@/lib/email/send";
+import {
+  sendAdminNewOrderEmail,
+  sendRefundConfirmationEmail,
+  sendPaymentFailedEmail,
+} from "@/lib/email/send";
 import { formatPaise } from "@/lib/money";
+import { summarizeItems } from "@/lib/order-summary";
+import { SITE_URL } from "@/lib/config";
 
 export const runtime = "nodejs";
 
@@ -176,7 +182,7 @@ async function handlePaymentFailed(
 
   const { data: order } = await supabase
     .from("orders")
-    .select("id, payment_attempts")
+    .select("id, order_number, email, total_paise, payment_attempts, emails_sent, status")
     .eq("razorpay_order_id", payment.order_id)
     .maybeSingle();
   if (!order) return;
@@ -189,6 +195,31 @@ async function handlePaymentFailed(
     at: new Date().toISOString(),
   });
   await supabase.from("orders").update({ payment_attempts: attempts }).eq("id", order.id);
+
+  // Only the pending state means the customer hasn't paid elsewhere/retried successfully yet —
+  // send once per order, not once per failed attempt, to avoid spamming repeated retries.
+  const emailsSent = (order.emails_sent as Record<string, string>) ?? {};
+  if (order.status === "pending" && !emailsSent.payment_failed) {
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("title_snapshot")
+      .eq("order_id", order.id);
+
+    const result = await sendPaymentFailedEmail({
+      orderNumber: order.order_number,
+      to: order.email,
+      amountLabel: formatPaise(order.total_paise),
+      itemsSummary: summarizeItems(items ?? []),
+      reason: payment.error_description ?? undefined,
+      checkoutUrl: `${SITE_URL}/cart`,
+    });
+    if (result.sent) {
+      await supabase
+        .from("orders")
+        .update({ emails_sent: { ...emailsSent, payment_failed: new Date().toISOString() } })
+        .eq("id", order.id);
+    }
+  }
 }
 
 async function handleRefundProcessed(
@@ -229,10 +260,16 @@ async function handleRefundProcessed(
   const guardKey = `refund_${refund.id}`;
   const emailsSent = (order.emails_sent as Record<string, string>) ?? {};
   if (!emailsSent[guardKey]) {
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("title_snapshot")
+      .eq("order_id", order.id);
+
     const result = await sendRefundConfirmationEmail({
       orderNumber: order.order_number,
       to: order.email,
       amountLabel: formatPaise(refund.amount),
+      itemsSummary: summarizeItems(items ?? []),
     });
     if (result.sent) {
       await supabase

@@ -5,6 +5,9 @@ import ShippingConfirmationEmail from "@/emails/ShippingConfirmation";
 import RefundConfirmationEmail from "@/emails/RefundConfirmation";
 import AdminNewOrderEmail from "@/emails/AdminNewOrder";
 import ContactReplyEmail from "@/emails/ContactReply";
+import DeliveredEmail from "@/emails/Delivered";
+import PaymentFailedEmail from "@/emails/PaymentFailed";
+import OrderCanceledEmail from "@/emails/OrderCanceled";
 import { OrderInvoiceDocument, type InvoiceItem } from "@/lib/pdf/OrderInvoice";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
@@ -20,9 +23,13 @@ const FROM = process.env.EMAIL_FROM ?? `${BRAND_NAME} <info@printscompany.in>`;
 
 export async function sendOrderConfirmationEmail(params: {
   orderNumber: string;
+  orderDate: string;
+  customerFirstName: string;
   to: string;
   token: string;
-  items: { title: string; qty: number; priceLabel: string }[];
+  items: { title: string; qty: number; priceLabel: string; sizeLabel?: string; frameFinish?: string }[];
+  subtotalLabel: string;
+  shippingLabel: string;
   totalLabel: string;
   addressLines: string[];
   invoice?: {
@@ -62,8 +69,12 @@ export async function sendOrderConfirmationEmail(params: {
     subject: `Order ${params.orderNumber} confirmed — ${BRAND_NAME}`,
     react: OrderConfirmationEmail({
       orderNumber: params.orderNumber,
+      orderDate: params.orderDate,
+      customerFirstName: params.customerFirstName,
       receiptUrl: `${SITE_URL}/order/${params.orderNumber}?t=${params.token}`,
       items: params.items,
+      subtotalLabel: params.subtotalLabel,
+      shippingLabel: params.shippingLabel,
       totalLabel: params.totalLabel,
       addressLines: params.addressLines,
     }),
@@ -107,6 +118,8 @@ export async function sendShippingConfirmationEmail(params: {
   to: string;
   courier: string;
   awb: string;
+  itemsSummary: string;
+  estimatedArrival?: string;
   trackingUrl?: string;
 }): Promise<SendResult> {
   const resend = client();
@@ -121,6 +134,8 @@ export async function sendShippingConfirmationEmail(params: {
       receiptUrl: `${SITE_URL}/order/${params.orderNumber}`,
       courier: params.courier,
       awb: params.awb,
+      itemsSummary: params.itemsSummary,
+      estimatedArrival: params.estimatedArrival,
       trackingUrl: params.trackingUrl,
     }),
   });
@@ -133,6 +148,7 @@ export async function sendRefundConfirmationEmail(params: {
   orderNumber: string;
   to: string;
   amountLabel: string;
+  itemsSummary?: string;
 }): Promise<SendResult> {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
@@ -143,7 +159,83 @@ export async function sendRefundConfirmationEmail(params: {
     subject: `Refund processed — ${params.orderNumber}`,
     react: RefundConfirmationEmail({
       orderNumber: params.orderNumber,
+      receiptUrl: `${SITE_URL}/order/${params.orderNumber}`,
       amountLabel: params.amountLabel,
+      itemsSummary: params.itemsSummary,
+    }),
+  });
+
+  if (error) return { sent: false, reason: error.message };
+  return { sent: true };
+}
+
+export async function sendDeliveredEmail(params: {
+  orderNumber: string;
+  to: string;
+}): Promise<SendResult> {
+  const resend = client();
+  if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: params.to,
+    subject: `Your prints have arrived — ${params.orderNumber}`,
+    react: DeliveredEmail({
+      orderNumber: params.orderNumber,
+      receiptUrl: `${SITE_URL}/order/${params.orderNumber}`,
+    }),
+  });
+
+  if (error) return { sent: false, reason: error.message };
+  return { sent: true };
+}
+
+export async function sendPaymentFailedEmail(params: {
+  orderNumber: string;
+  to: string;
+  amountLabel: string;
+  itemsSummary: string;
+  reason?: string;
+  checkoutUrl: string;
+}): Promise<SendResult> {
+  const resend = client();
+  if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: params.to,
+    subject: `We couldn’t complete your payment — ${params.orderNumber}`,
+    react: PaymentFailedEmail({
+      orderNumber: params.orderNumber,
+      amountLabel: params.amountLabel,
+      itemsSummary: params.itemsSummary,
+      reason: params.reason,
+      checkoutUrl: params.checkoutUrl,
+    }),
+  });
+
+  if (error) return { sent: false, reason: error.message };
+  return { sent: true };
+}
+
+export async function sendOrderCanceledEmail(params: {
+  orderNumber: string;
+  to: string;
+  amountLabel: string;
+  itemsSummary: string;
+}): Promise<SendResult> {
+  const resend = client();
+  if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: params.to,
+    subject: `Your order has been canceled — ${params.orderNumber}`,
+    react: OrderCanceledEmail({
+      orderNumber: params.orderNumber,
+      amountLabel: params.amountLabel,
+      itemsSummary: params.itemsSummary,
+      browseUrl: `${SITE_URL}/prints`,
     }),
   });
 

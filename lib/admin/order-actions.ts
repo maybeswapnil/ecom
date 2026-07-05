@@ -3,9 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendShippingConfirmationEmail, sendRefundConfirmationEmail } from "@/lib/email/send";
+import {
+  sendShippingConfirmationEmail,
+  sendRefundConfirmationEmail,
+  sendDeliveredEmail,
+  sendOrderCanceledEmail,
+} from "@/lib/email/send";
 import { sendOrderConfirmationForOrder } from "@/lib/email/order-confirmation";
 import { formatPaise } from "@/lib/money";
+import { summarizeItems } from "@/lib/order-summary";
 
 async function historyRow(
   supabase: ReturnType<typeof createAdminClient>,
@@ -74,11 +80,18 @@ export async function markShippedManual(
 
   const emailsSent = (order.emails_sent as Record<string, string>) ?? {};
   if (!emailsSent.shipping) {
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("title_snapshot")
+      .eq("order_id", orderId);
+    const itemsSummary = summarizeItems(items ?? []);
+
     const result = await sendShippingConfirmationEmail({
       orderNumber: order.order_number,
       to: order.email,
       courier,
       awb,
+      itemsSummary,
       trackingUrl,
     });
     if (result.sent) {
@@ -94,12 +107,12 @@ export async function markShippedManual(
 }
 
 export async function markDelivered(orderId: string) {
-  const { email } = await requireAdmin();
+  const { email: actorEmail } = await requireAdmin();
   const supabase = createAdminClient();
 
   const { data: order } = await supabase
     .from("orders")
-    .select("id, status")
+    .select("id, status, order_number, email, emails_sent")
     .eq("id", orderId)
     .eq("status", "shipped")
     .maybeSingle();
@@ -111,19 +124,30 @@ export async function markDelivered(orderId: string) {
     .update({ delivered_at: new Date().toISOString(), status: "delivered" })
     .eq("order_id", orderId)
     .eq("active", true);
-  await historyRow(supabase, orderId, "shipped", "delivered", email);
+  await historyRow(supabase, orderId, "shipped", "delivered", actorEmail);
+
+  const emailsSent = (order.emails_sent as Record<string, string>) ?? {};
+  if (!emailsSent.delivered) {
+    const result = await sendDeliveredEmail({ orderNumber: order.order_number, to: order.email });
+    if (result.sent) {
+      await supabase
+        .from("orders")
+        .update({ emails_sent: { ...emailsSent, delivered: new Date().toISOString() } })
+        .eq("id", orderId);
+    }
+  }
 
   revalidatePath(`/admin/orders/${orderId}`);
   return { ok: true };
 }
 
 export async function cancelPendingOrder(orderId: string, reason: string) {
-  const { email } = await requireAdmin();
+  const { email: actorEmail } = await requireAdmin();
   const supabase = createAdminClient();
 
   const { data: order } = await supabase
     .from("orders")
-    .select("id, status")
+    .select("id, status, order_number, email, total_paise, emails_sent")
     .eq("id", orderId)
     .eq("status", "pending")
     .maybeSingle();
@@ -133,7 +157,28 @@ export async function cancelPendingOrder(orderId: string, reason: string) {
     .from("orders")
     .update({ status: "cancelled", cancelled_reason: reason })
     .eq("id", orderId);
-  await historyRow(supabase, orderId, "pending", "cancelled", email, reason);
+  await historyRow(supabase, orderId, "pending", "cancelled", actorEmail, reason);
+
+  const emailsSent = (order.emails_sent as Record<string, string>) ?? {};
+  if (!emailsSent.cancelled) {
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("title_snapshot")
+      .eq("order_id", orderId);
+
+    const result = await sendOrderCanceledEmail({
+      orderNumber: order.order_number,
+      to: order.email,
+      amountLabel: formatPaise(order.total_paise),
+      itemsSummary: summarizeItems(items ?? []),
+    });
+    if (result.sent) {
+      await supabase
+        .from("orders")
+        .update({ emails_sent: { ...emailsSent, cancelled: new Date().toISOString() } })
+        .eq("id", orderId);
+    }
+  }
 
   revalidatePath(`/admin/orders/${orderId}`);
   return { ok: true };
@@ -190,11 +235,17 @@ export async function resendEmail(
       .maybeSingle();
     if (!shipment) return { error: "No shipment on file for this order." };
 
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("title_snapshot")
+      .eq("order_id", orderId);
+
     const result = await sendShippingConfirmationEmail({
       orderNumber: order.order_number,
       to: order.email,
       courier: shipment.courier_name ?? "Courier",
       awb: shipment.awb ?? "",
+      itemsSummary: summarizeItems(items ?? []),
       trackingUrl: shipment.label_url ?? undefined,
     });
     if (!result.sent) return { error: result.reason };
@@ -213,10 +264,16 @@ export async function resendEmail(
     .maybeSingle();
   if (!refund) return { error: "No refund on file for this order." };
 
+  const { data: refundItems } = await supabase
+    .from("order_items")
+    .select("title_snapshot")
+    .eq("order_id", orderId);
+
   const result = await sendRefundConfirmationEmail({
     orderNumber: order.order_number,
     to: order.email,
     amountLabel: formatPaise(refund.amount_paise),
+    itemsSummary: summarizeItems(refundItems ?? []),
   });
   if (!result.sent) return { error: result.reason };
   await stampEmailGuard(supabase, orderId, `refund_${refund.id}`);

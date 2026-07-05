@@ -123,6 +123,7 @@ export async function POST(req: Request) {
       status: "pending",
       email: input.customer.email,
       phone: input.customer.phone,
+      customer_name: input.customer.name,
       shipping_address: input.address,
       subtotal_paise: subtotalPaise,
       shipping_paise: shippingPaise,

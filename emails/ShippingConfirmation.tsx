@@ -1,10 +1,23 @@
-import { Body, Container, Head, Heading, Html, Preview, Text } from "@react-email/components";
+import { Preview, Section, Text } from "@react-email/components";
+import {
+  EmailShell,
+  EmailMasthead,
+  EmailFooter,
+  EmailEyebrow,
+  EmailHeadline,
+  EmailCta,
+  EmailPanel,
+  colors,
+  serif,
+} from "@/emails/shared/EmailLayout";
 
 type Props = {
   orderNumber: string;
   receiptUrl: string;
   courier: string;
   awb: string;
+  itemsSummary: string;
+  estimatedArrival?: string;
   trackingUrl?: string;
 };
 
@@ -13,24 +26,59 @@ export default function ShippingConfirmationEmail({
   receiptUrl,
   courier,
   awb,
+  itemsSummary,
+  estimatedArrival,
   trackingUrl,
 }: Props) {
   return (
-    <Html>
-      <Head />
-      <Preview>Your print is on its way — {orderNumber}</Preview>
-      <Body style={{ backgroundColor: "#F7F4ED", fontFamily: "Georgia, serif" }}>
-        <Container style={{ padding: "32px 24px", maxWidth: 560 }}>
-          <Heading style={{ fontSize: 28, color: "#1C1915" }}>Your print is on its way.</Heading>
-          <Text style={{ color: "#6E6557" }}>Order {orderNumber} has shipped via {courier}.</Text>
-          <Text style={{ color: "#1C1915" }}>AWB: {awb}</Text>
-          {trackingUrl && <Text style={{ color: "#1C1915" }}>Track: {trackingUrl}</Text>}
-          <Text style={{ color: "#6E6557" }}>Full order details: {receiptUrl}</Text>
-          <Text style={{ color: "#B4AA99", fontSize: 13 }}>
-            Questions? Write to info@printscompany.in
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+    <EmailShell>
+      <Preview>{`Your print is on its way — ${orderNumber}`}</Preview>
+      <EmailMasthead />
+
+      <Section style={{ padding: "34px 44px 8px" }}>
+        <EmailEyebrow>On its way</EmailEyebrow>
+        <EmailHeadline>Your prints have been dispatched.</EmailHeadline>
+        <Text style={{ fontSize: 15, lineHeight: "1.7", color: colors.bodyText, margin: "16px 0 0" }}>
+          Framed, wrapped, and packed flat with plenty of care. Order{" "}
+          <strong style={{ fontWeight: 600 }}>{orderNumber}</strong> is now with the courier.
+        </Text>
+      </Section>
+
+      <EmailPanel>
+        <table role="presentation" width="100%">
+          <tr>
+            <td style={{ verticalAlign: "top" }}>
+              <Text style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: colors.faintSoft, margin: "0 0 5px" }}>
+                Courier
+              </Text>
+              <Text style={{ fontFamily: serif, fontSize: 17, color: colors.ink, margin: 0 }}>{courier}</Text>
+              <Text style={{ fontSize: "12.5px", color: colors.faint, margin: "3px 0 0" }}>AWB {awb}</Text>
+            </td>
+            {estimatedArrival && (
+              <td style={{ verticalAlign: "top", textAlign: "right" }}>
+                <Text style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: colors.faintSoft, margin: "0 0 5px" }}>
+                  Estimated arrival
+                </Text>
+                <Text style={{ fontFamily: serif, fontSize: 17, color: colors.ink, margin: 0 }}>{estimatedArrival}</Text>
+              </td>
+            )}
+          </tr>
+        </table>
+      </EmailPanel>
+
+      <Section style={{ padding: "22px 44px 4px" }}>
+        <Text style={{ fontFamily: serif, fontSize: 17, color: colors.ink, margin: 0 }}>{itemsSummary}</Text>
+      </Section>
+
+      <Section style={{ padding: "26px 44px 34px", textAlign: "center" }}>
+        <EmailCta href={trackingUrl ?? receiptUrl}>Track your parcel</EmailCta>
+        <Text style={{ fontSize: "12.5px", lineHeight: "1.6", color: colors.faint, margin: "18px 0 0" }}>
+          Your shipment is fully insured. If the packaging arrives damaged, photograph it and reply
+          here.
+        </Text>
+      </Section>
+
+      <EmailFooter />
+    </EmailShell>
   );
 }

@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  /* Palette — from Print Company v2.dc.html mockup */
+  --color-paper: #f7f4ed;
+  --color-ink: #1c1915;
+  --color-ink-soft: #37322b;
+  --color-muted: #8a8173;
+  --color-muted-soft: #6e6557;
+  --color-faint: #b4aa99;
+  --color-hairline: #e4ded1;
+  --color-hairline-soft: #ede8dc;
+  --color-border-input: #dcd5c6;
+  --color-surface: #fdfcf9;
+  --color-surface-sunken: #efebe1;
+  --color-image-placeholder: #eae5da;
+  --color-accent-green: #5b7c63;
+
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-muted: var(--color-muted);
+  --color-muted-soft: var(--color-muted-soft);
+  --color-faint: var(--color-faint);
+  --color-hairline: var(--color-hairline);
+  --color-hairline-soft: var(--color-hairline-soft);
+  --color-border-input: var(--color-border-input);
+  --color-surface: var(--color-surface);
+  --color-surface-sunken: var(--color-surface-sunken);
+  --color-image-placeholder: var(--color-image-placeholder);
+  --color-accent-green: var(--color-accent-green);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-paper);
+}
+
+body {
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+input::placeholder {
+  color: var(--color-faint);
+}
+
+@keyframes pc-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pc-fade-in {
+  animation: pc-fade 0.4s ease both;
+}
+
+.pc-spin {
+  animation: pc-spin 1s linear infinite;
+}

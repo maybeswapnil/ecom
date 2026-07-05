@@ -31,6 +31,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // Razorpay live-mode review expects policy pages at these conventional paths.
+      { source: "/shipping-policy", destination: "/shipping", permanent: true },
+      { source: "/terms-of-service", destination: "/terms", permanent: true },
+      { source: "/privacy-policy", destination: "/privacy", permanent: true },
+      { source: "/returns-policy", destination: "/refunds", permanent: true },
+      { source: "/contact-us", destination: "/contact", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

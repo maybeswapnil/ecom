@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { policyTabs, policyDocs, type PolicyKey } from "@/lib/policy-content";
+import { ContactForm } from "@/components/store/ContactForm";
 
 export function PolicyPage({ active }: { active: PolicyKey }) {
   const doc = policyDocs[active];
@@ -29,17 +30,25 @@ export function PolicyPage({ active }: { active: PolicyKey }) {
           </Link>
         ))}
       </div>
-      <div className="max-w-[62ch]">
+      <div className="max-w-[72ch]">
         <h2 className="font-display font-medium text-2xl m-0 mb-5">{doc.title}</h2>
-        {doc.paras.map((para, i) => (
-          <p key={i} className="text-[15.5px] leading-[1.75] text-muted-soft m-0 mb-4.5">
-            {para}
-          </p>
+        {doc.sections.map((section, si) => (
+          <div key={si} className="mb-7">
+            {section.heading && (
+              <h3 className="font-display font-medium text-lg m-0 mb-3">{section.heading}</h3>
+            )}
+            {section.paras.map((para, pi) => (
+              <p key={pi} className="text-[15.5px] leading-[1.75] text-muted-soft m-0 mb-3.5">
+                {para}
+              </p>
+            ))}
+          </div>
         ))}
         <div className="mt-7.5 text-[12.5px] text-faint">
-          Last updated 12 May 2026 · Questions?{" "}
+          Last updated 5 July 2026 · Questions?{" "}
           <span className="text-ink">info@printscompany.in</span>
         </div>
+        {active === "contact" && <ContactForm />}
       </div>
     </section>
   );

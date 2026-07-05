@@ -231,7 +231,6 @@ export const policyDocs: Record<PolicyKey, { title: string; sections: PolicySect
         paras: [
           "The fastest way to reach us is email — info@printscompany.in — and the photographer answers personally, usually within a day.",
           "For questions about a live order, include your order number (it starts with PC- or FP-).",
-          "Workshop: Indiranagar, Bengaluru 560038. By appointment only.",
         ],
       },
     ],

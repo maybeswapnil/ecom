@@ -89,7 +89,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               <div key={l.sku} className="flex gap-4 py-5.5 border-b border-hairline-soft">
                 <div className="w-16 flex-none bg-surface border border-hairline p-1 self-start">
                   <div className="relative w-full aspect-square">
-                    <Image src={l.snapshot.image} alt="" fill className="object-cover" />
+                    <Image src={l.snapshot.image} alt={l.snapshot.title} fill className="object-cover" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">

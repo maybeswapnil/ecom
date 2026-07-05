@@ -1,15 +1,57 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { getLiveProducts } from "@/lib/catalog";
 import { ProductCard } from "@/components/store/ProductCard";
-import { BRAND_NAME } from "@/lib/config";
+import { BRAND_NAME, SITE_URL } from "@/lib/config";
+
+const HOME_DESCRIPTION =
+  "A small collection of limited-edition framed photographic prints from a decade spent wandering India. Archival paper, hand-framed, shipped ready to hang.";
+
+export const metadata: Metadata = {
+  title: `${BRAND_NAME} — Framed Photographic Prints`,
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title: `${BRAND_NAME} — Framed Photographic Prints`,
+    description: HOME_DESCRIPTION,
+    url: SITE_URL,
+    siteName: BRAND_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${BRAND_NAME} — Framed Photographic Prints`,
+    description: HOME_DESCRIPTION,
+  },
+};
 
 export default async function HomePage() {
   const products = await getLiveProducts();
   const featured = products.slice(0, 3);
 
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: BRAND_NAME,
+      url: SITE_URL,
+      email: "info@swapnilsharma.in",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: BRAND_NAME,
+      url: SITE_URL,
+    },
+  ];
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <div className="max-w-[1000px] mx-auto px-7 py-13 md:py-[90px] md:pb-10 flex flex-col md:flex-row gap-12 md:gap-16 items-center justify-center md:min-h-[72vh]">
         <div className="flex-[1_1_50%] max-w-[440px]">

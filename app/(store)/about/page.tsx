@@ -1,10 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BRAND_NAME } from "@/lib/config";
+import type { Metadata } from "next";
+import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
-export const metadata = {
+const ABOUT_DESCRIPTION = `The story behind ${BRAND_NAME} — a decade of photographs from across India.`;
+
+export const metadata: Metadata = {
   title: "About",
-  description: `The story behind ${BRAND_NAME} — a decade of photographs from across India.`,
+  description: ABOUT_DESCRIPTION,
+  alternates: { canonical: `${SITE_URL}/about` },
+  openGraph: {
+    title: `About | ${BRAND_NAME}`,
+    description: ABOUT_DESCRIPTION,
+    url: `${SITE_URL}/about`,
+    siteName: BRAND_NAME,
+    type: "website",
+  },
 };
 
 export default function AboutPage() {

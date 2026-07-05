@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { BRAND_NAME, SITE_URL } from "@/lib/config";
+
 export type PolicyKey = "refunds" | "shipping" | "privacy" | "terms" | "contact";
 
 export const policyTabs: { key: PolicyKey; label: string; href: string }[] = [
@@ -50,3 +53,27 @@ export const policyDocs: Record<PolicyKey, { title: string; paras: string[] }> =
     ],
   },
 };
+
+function truncate(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+}
+
+export function policyMetadata(key: PolicyKey): Metadata {
+  const doc = policyDocs[key];
+  const tab = policyTabs.find((t) => t.key === key)!;
+  const description = truncate(doc.paras[0], 155);
+  const url = `${SITE_URL}${tab.href}`;
+
+  return {
+    title: doc.title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${doc.title} | ${BRAND_NAME}`,
+      description,
+      url,
+      siteName: BRAND_NAME,
+      type: "website",
+    },
+  };
+}

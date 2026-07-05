@@ -303,7 +303,7 @@ export function CheckoutForm() {
               {lines.map((l) => (
                 <div key={l.sku} className="flex items-center gap-3">
                   <div className="relative w-11 h-11 flex-none border border-hairline">
-                    <Image src={l.snapshot.image} alt="" fill className="object-cover" />
+                    <Image src={l.snapshot.image} alt={l.snapshot.title} fill className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0 text-[13px] text-ink">
                     {l.snapshot.title}

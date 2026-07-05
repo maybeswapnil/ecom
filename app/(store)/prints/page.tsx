@@ -1,10 +1,23 @@
+import type { Metadata } from "next";
 import { getLiveProducts } from "@/lib/catalog";
 import { PrintsGrid, type GridCard } from "@/components/store/PrintsGrid";
 import { ProductCard } from "@/components/store/ProductCard";
+import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
-export const metadata = {
+const PRINTS_DESCRIPTION =
+  "Browse the full collection of limited-edition framed photographic prints, printed on archival paper and framed by hand.";
+
+export const metadata: Metadata = {
   title: "All Prints",
-  description: "Browse the full collection of limited-edition framed photographic prints.",
+  description: PRINTS_DESCRIPTION,
+  alternates: { canonical: `${SITE_URL}/prints` },
+  openGraph: {
+    title: `All Prints | ${BRAND_NAME}`,
+    description: PRINTS_DESCRIPTION,
+    url: `${SITE_URL}/prints`,
+    siteName: BRAND_NAME,
+    type: "website",
+  },
 };
 
 export default async function PrintsPage() {
@@ -15,8 +28,21 @@ export default async function PrintsPage() {
     node: <ProductCard product={p} />,
   }));
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Prints", item: `${SITE_URL}/prints` },
+    ],
+  };
+
   return (
     <section className="max-w-[1320px] mx-auto px-7 pt-20 pb-15">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mb-13.5">
         <div className="text-[11px] tracking-[0.32em] uppercase text-muted font-medium mb-5">
           The collection

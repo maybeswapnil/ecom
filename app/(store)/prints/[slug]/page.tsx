@@ -46,23 +46,39 @@ export default async function ProductPage({
   const year = product.tags.find((t) => t.startsWith("year:"))?.slice(5) ?? "";
   const ratio = product.tags.includes("portrait") ? "4/5" : "3/2";
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.title,
-    description: product.description,
-    image: product.images.map((img) => img.url),
-    sku: variants[0]?.sku,
-    offers: variants.map((v) => ({
-      "@type": "Offer",
-      sku: v.sku,
-      priceCurrency: "INR",
-      price: (v.price_paise / 100).toFixed(2),
-      availability:
-        v.stock_qty > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `${SITE_URL}/prints/${product.slug}`,
-    })),
-  };
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.title,
+      description: product.description,
+      image: product.images.map((img) => img.url),
+      sku: variants[0]?.sku,
+      offers: variants.map((v) => ({
+        "@type": "Offer",
+        sku: v.sku,
+        priceCurrency: "INR",
+        price: (v.price_paise / 100).toFixed(2),
+        availability:
+          v.stock_qty > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        url: `${SITE_URL}/prints/${product.slug}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Prints", item: `${SITE_URL}/prints` },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: product.title,
+          item: `${SITE_URL}/prints/${product.slug}`,
+        },
+      ],
+    },
+  ];
 
   return (
     <>

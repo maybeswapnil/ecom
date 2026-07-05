@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MessageReadToggle } from "@/components/admin/MessageReadToggle";
+import { MessageReplyForm } from "@/components/admin/MessageReplyForm";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,9 @@ export default async function AdminMessagesPage({
 
   const { data: messages, count } = await supabase
     .from("contact_messages")
-    .select("id, name, email, message, is_read, created_at", { count: "exact" })
+    .select("id, name, email, message, is_read, created_at, replied_at, reply_body", {
+      count: "exact",
+    })
     .order("created_at", { ascending: false })
     .range((pageNum - 1) * PAGE_SIZE, pageNum * PAGE_SIZE - 1);
 
@@ -49,6 +52,7 @@ export default async function AdminMessagesPage({
               </div>
             </div>
             <p className="text-sm text-ink whitespace-pre-line m-0">{m.message}</p>
+            <MessageReplyForm id={m.id} repliedAt={m.replied_at} replyBody={m.reply_body} />
           </div>
         ))}
         {(messages ?? []).length === 0 && (

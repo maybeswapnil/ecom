@@ -3,6 +3,7 @@ import OrderConfirmationEmail from "@/emails/OrderConfirmation";
 import ShippingConfirmationEmail from "@/emails/ShippingConfirmation";
 import RefundConfirmationEmail from "@/emails/RefundConfirmation";
 import AdminNewOrderEmail from "@/emails/AdminNewOrder";
+import ContactReplyEmail from "@/emails/ContactReply";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
 type SendResult = { sent: true } | { sent: false; reason: string };
@@ -113,6 +114,30 @@ export async function sendRefundConfirmationEmail(params: {
     react: RefundConfirmationEmail({
       orderNumber: params.orderNumber,
       amountLabel: params.amountLabel,
+    }),
+  });
+
+  if (error) return { sent: false, reason: error.message };
+  return { sent: true };
+}
+
+export async function sendContactReplyEmail(params: {
+  to: string;
+  name: string;
+  originalMessage: string;
+  replyBody: string;
+}): Promise<SendResult> {
+  const resend = client();
+  if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: params.to,
+    subject: `Re: your message to ${BRAND_NAME}`,
+    react: ContactReplyEmail({
+      name: params.name,
+      originalMessage: params.originalMessage,
+      replyBody: params.replyBody,
     }),
   });
 

@@ -82,3 +82,7 @@ export const contactFormSchema = z.object({
 
 export type ContactFormValues = z.infer<typeof contactFormSchema>;
 export type ContactFormErrors = Partial<Record<keyof ContactFormValues, string>>;
+
+export const contactReplySchema = z.object({
+  reply: z.string().min(1, "Reply cannot be empty").max(4000, "Reply is too long"),
+});

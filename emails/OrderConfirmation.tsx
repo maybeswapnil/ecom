@@ -24,7 +24,7 @@ export default function OrderConfirmationEmail({
         <Container style={{ padding: "32px 24px", maxWidth: 560 }}>
           <Heading style={{ fontSize: 28, color: "#1C1915" }}>Thank you for your order.</Heading>
           <Text style={{ color: "#6E6557" }}>
-            Order {orderNumber} is confirmed. Here&rsquo;s what you ordered:
+            {`Order ${orderNumber} is confirmed. Here’s what you ordered:`}
           </Text>
           <Section>
             {items.map((item) => (

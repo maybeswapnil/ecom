@@ -1,9 +1,11 @@
 import { Resend } from "resend";
+import { renderToBuffer } from "@react-pdf/renderer";
 import OrderConfirmationEmail from "@/emails/OrderConfirmation";
 import ShippingConfirmationEmail from "@/emails/ShippingConfirmation";
 import RefundConfirmationEmail from "@/emails/RefundConfirmation";
 import AdminNewOrderEmail from "@/emails/AdminNewOrder";
 import ContactReplyEmail from "@/emails/ContactReply";
+import { OrderInvoiceDocument, type InvoiceItem } from "@/lib/pdf/OrderInvoice";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
 type SendResult = { sent: true } | { sent: false; reason: string };
@@ -23,9 +25,36 @@ export async function sendOrderConfirmationEmail(params: {
   items: { title: string; qty: number; priceLabel: string }[];
   totalLabel: string;
   addressLines: string[];
+  invoice?: {
+    orderDate: string;
+    customerName: string;
+    items: InvoiceItem[];
+    subtotalPaise: number;
+    shippingPaise: number;
+    discountPaise: number;
+    totalPaise: number;
+  };
 }): Promise<SendResult> {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
+
+  let attachments: { filename: string; content: Buffer }[] | undefined;
+  if (params.invoice) {
+    const pdfBuffer = await renderToBuffer(
+      OrderInvoiceDocument({
+        orderNumber: params.orderNumber,
+        orderDate: params.invoice.orderDate,
+        customerName: params.invoice.customerName,
+        addressLines: params.addressLines,
+        items: params.invoice.items,
+        subtotalPaise: params.invoice.subtotalPaise,
+        shippingPaise: params.invoice.shippingPaise,
+        discountPaise: params.invoice.discountPaise,
+        totalPaise: params.invoice.totalPaise,
+      })
+    );
+    attachments = [{ filename: `invoice-${params.orderNumber}.pdf`, content: pdfBuffer }];
+  }
 
   const { error } = await resend.emails.send({
     from: FROM,
@@ -38,6 +67,7 @@ export async function sendOrderConfirmationEmail(params: {
       totalLabel: params.totalLabel,
       addressLines: params.addressLines,
     }),
+    attachments,
   });
 
   if (error) return { sent: false, reason: error.message };

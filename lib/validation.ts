@@ -86,3 +86,17 @@ export type ContactFormErrors = Partial<Record<keyof ContactFormValues, string>>
 export const contactReplySchema = z.object({
   reply: z.string().min(1, "Reply cannot be empty").max(4000, "Reply is too long"),
 });
+
+export const companySettingsSchema = z.object({
+  companyName: z.string().min(1, "Company name is required").max(200, "Too long"),
+  addressLine1: z.string().max(200, "Too long").optional().default(""),
+  addressLine2: z.string().max(200, "Too long").optional().default(""),
+  city: z.string().max(120, "Too long").optional().default(""),
+  state: z.string().max(120, "Too long").optional().default(""),
+  pincode: z.string().max(20, "Too long").optional().default(""),
+  supportEmail: z.string().min(1, "Support email is required").email("Enter a valid email address"),
+  supportPhone: z.string().max(40, "Too long").optional().default(""),
+});
+
+export type CompanySettingsValues = z.infer<typeof companySettingsSchema>;
+export type CompanySettingsErrors = Partial<Record<keyof CompanySettingsValues, string>>;

@@ -1,4 +1,5 @@
 import { Preview, Section, Text } from "@react-email/components";
+import { BRAND_NAME } from "@/lib/config";
 import {
   EmailShell,
   EmailMasthead,
@@ -16,6 +17,7 @@ type Props = {
   amountLabel: string;
   itemsSummary: string;
   browseUrl: string;
+  companyName?: string;
 };
 
 export default function OrderCanceledEmail({
@@ -23,11 +25,12 @@ export default function OrderCanceledEmail({
   amountLabel,
   itemsSummary,
   browseUrl,
+  companyName = BRAND_NAME,
 }: Props) {
   return (
     <EmailShell>
       <Preview>{`Your order has been canceled — ${orderNumber}`}</Preview>
-      <EmailMasthead />
+      <EmailMasthead companyName={companyName} />
 
       <Section style={{ padding: "34px 44px 8px" }}>
         <EmailEyebrow tone="alert">Order canceled</EmailEyebrow>
@@ -67,7 +70,7 @@ export default function OrderCanceledEmail({
         </Text>
       </Section>
 
-      <EmailFooter />
+      <EmailFooter companyName={companyName} />
     </EmailShell>
   );
 }

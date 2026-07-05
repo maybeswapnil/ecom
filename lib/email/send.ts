@@ -9,6 +9,7 @@ import DeliveredEmail from "@/emails/Delivered";
 import PaymentFailedEmail from "@/emails/PaymentFailed";
 import OrderCanceledEmail from "@/emails/OrderCanceled";
 import { OrderInvoiceDocument, type InvoiceItem } from "@/lib/pdf/OrderInvoice";
+import { getCompanySettings, companySettingsAddressLines } from "@/lib/company-settings";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
 type SendResult = { sent: true } | { sent: false; reason: string };
@@ -45,6 +46,8 @@ export async function sendOrderConfirmationEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
+  const settings = await getCompanySettings();
+
   let attachments: { filename: string; content: Buffer }[] | undefined;
   if (params.invoice) {
     const pdfBuffer = await renderToBuffer(
@@ -58,6 +61,10 @@ export async function sendOrderConfirmationEmail(params: {
         shippingPaise: params.invoice.shippingPaise,
         discountPaise: params.invoice.discountPaise,
         totalPaise: params.invoice.totalPaise,
+        companyName: settings.companyName,
+        companyAddressLines: companySettingsAddressLines(settings),
+        supportEmail: settings.supportEmail,
+        supportPhone: settings.supportPhone,
       })
     );
     attachments = [{ filename: `invoice-${params.orderNumber}.pdf`, content: pdfBuffer }];
@@ -66,7 +73,7 @@ export async function sendOrderConfirmationEmail(params: {
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
-    subject: `Order ${params.orderNumber} confirmed — ${BRAND_NAME}`,
+    subject: `Order ${params.orderNumber} confirmed — ${settings.companyName}`,
     react: OrderConfirmationEmail({
       orderNumber: params.orderNumber,
       orderDate: params.orderDate,
@@ -77,6 +84,7 @@ export async function sendOrderConfirmationEmail(params: {
       shippingLabel: params.shippingLabel,
       totalLabel: params.totalLabel,
       addressLines: params.addressLines,
+      companyName: settings.companyName,
     }),
     attachments,
   });
@@ -125,6 +133,8 @@ export async function sendShippingConfirmationEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
+  const settings = await getCompanySettings();
+
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
@@ -137,6 +147,7 @@ export async function sendShippingConfirmationEmail(params: {
       itemsSummary: params.itemsSummary,
       estimatedArrival: params.estimatedArrival,
       trackingUrl: params.trackingUrl,
+      companyName: settings.companyName,
     }),
   });
 
@@ -153,6 +164,8 @@ export async function sendRefundConfirmationEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
+  const settings = await getCompanySettings();
+
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
@@ -162,6 +175,7 @@ export async function sendRefundConfirmationEmail(params: {
       receiptUrl: `${SITE_URL}/order/${params.orderNumber}`,
       amountLabel: params.amountLabel,
       itemsSummary: params.itemsSummary,
+      companyName: settings.companyName,
     }),
   });
 
@@ -176,6 +190,8 @@ export async function sendDeliveredEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
+  const settings = await getCompanySettings();
+
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
@@ -183,6 +199,7 @@ export async function sendDeliveredEmail(params: {
     react: DeliveredEmail({
       orderNumber: params.orderNumber,
       receiptUrl: `${SITE_URL}/order/${params.orderNumber}`,
+      companyName: settings.companyName,
     }),
   });
 
@@ -201,6 +218,8 @@ export async function sendPaymentFailedEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
+  const settings = await getCompanySettings();
+
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
@@ -211,6 +230,7 @@ export async function sendPaymentFailedEmail(params: {
       itemsSummary: params.itemsSummary,
       reason: params.reason,
       checkoutUrl: params.checkoutUrl,
+      companyName: settings.companyName,
     }),
   });
 
@@ -227,6 +247,8 @@ export async function sendOrderCanceledEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
+  const settings = await getCompanySettings();
+
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
@@ -236,6 +258,7 @@ export async function sendOrderCanceledEmail(params: {
       amountLabel: params.amountLabel,
       itemsSummary: params.itemsSummary,
       browseUrl: `${SITE_URL}/prints`,
+      companyName: settings.companyName,
     }),
   });
 
@@ -252,14 +275,18 @@ export async function sendContactReplyEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
+  const settings = await getCompanySettings();
+
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.to,
-    subject: `Re: your message to ${BRAND_NAME}`,
+    subject: `Re: your message to ${settings.companyName}`,
     react: ContactReplyEmail({
       name: params.name,
       originalMessage: params.originalMessage,
       replyBody: params.replyBody,
+      companyName: settings.companyName,
+      supportEmail: settings.supportEmail,
     }),
   });
 

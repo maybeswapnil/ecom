@@ -6,14 +6,22 @@ type Props = {
   name: string;
   originalMessage: string;
   replyBody: string;
+  companyName?: string;
+  supportEmail?: string;
 };
 
-export default function ContactReplyEmail({ name, originalMessage, replyBody }: Props) {
+export default function ContactReplyEmail({
+  name,
+  originalMessage,
+  replyBody,
+  companyName = BRAND_NAME,
+  supportEmail = "info@printscompany.in",
+}: Props) {
   const greetingName = name.trim().split(/\s+/)[0] || "there";
 
   return (
     <EmailShell>
-      <Preview>{`Re: your message to ${BRAND_NAME}`}</Preview>
+      <Preview>{`Re: your message to ${companyName}`}</Preview>
 
       <Section
         style={{
@@ -39,7 +47,7 @@ export default function ContactReplyEmail({ name, originalMessage, replyBody }: 
             </td>
             <td style={{ paddingLeft: 12 }}>
               <Text style={{ fontSize: 14, fontWeight: 600, color: colors.ink, margin: 0 }}>
-                {BRAND_NAME} Team
+                {companyName} Team
               </Text>
               <Text style={{ fontSize: 12, color: colors.faint, margin: 0 }}>Customer care</Text>
             </td>
@@ -86,21 +94,21 @@ export default function ContactReplyEmail({ name, originalMessage, replyBody }: 
 
         <Section style={{ marginTop: 22 }}>
           <Text style={{ fontFamily: serif, fontSize: 17, color: colors.ink, margin: 0 }}>
-            {BRAND_NAME} Team
+            {companyName} Team
           </Text>
           <Text style={{ fontSize: "12.5px", color: colors.faint, marginTop: 2 }}>
-            {BRAND_NAME} · Customer care
+            {companyName} · Customer care
           </Text>
         </Section>
       </Section>
 
       <Section style={{ padding: "24px 44px 34px", textAlign: "left" }}>
-        <EmailCta href="mailto:info@printscompany.in">Reply to this email</EmailCta>
+        <EmailCta href={`mailto:${supportEmail}`}>Reply to this email</EmailCta>
       </Section>
 
       <Section style={{ padding: "22px 44px 30px", borderTop: `1px solid ${colors.border}` }}>
         <Text style={{ fontSize: "11.5px", color: colors.faintSoft, letterSpacing: "0.03em", margin: 0 }}>
-          info@printscompany.in · Payments by Razorpay · Made in India
+          {supportEmail} · Payments by Razorpay · Made in India
         </Text>
       </Section>
     </EmailShell>

@@ -1,4 +1,5 @@
 import { Preview, Section, Text } from "@react-email/components";
+import { BRAND_NAME } from "@/lib/config";
 import {
   EmailShell,
   EmailMasthead,
@@ -17,6 +18,7 @@ type Props = {
   itemsSummary: string;
   reason?: string;
   checkoutUrl: string;
+  companyName?: string;
 };
 
 export default function PaymentFailedEmail({
@@ -25,11 +27,12 @@ export default function PaymentFailedEmail({
   itemsSummary,
   reason,
   checkoutUrl,
+  companyName = BRAND_NAME,
 }: Props) {
   return (
     <EmailShell>
       <Preview>{`We couldn’t complete your payment — ${orderNumber}`}</Preview>
-      <EmailMasthead />
+      <EmailMasthead companyName={companyName} />
 
       <Section style={{ padding: "34px 44px 8px" }}>
         <EmailEyebrow tone="alert">Payment unsuccessful</EmailEyebrow>
@@ -86,7 +89,7 @@ export default function PaymentFailedEmail({
         </Text>
       </Section>
 
-      <EmailFooter />
+      <EmailFooter companyName={companyName} />
     </EmailShell>
   );
 }

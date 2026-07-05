@@ -1,4 +1,5 @@
 import { Preview, Section, Text } from "@react-email/components";
+import { BRAND_NAME } from "@/lib/config";
 import {
   EmailShell,
   EmailMasthead,
@@ -13,13 +14,18 @@ import {
 type Props = {
   orderNumber: string;
   receiptUrl: string;
+  companyName?: string;
 };
 
-export default function DeliveredEmail({ orderNumber, receiptUrl }: Props) {
+export default function DeliveredEmail({
+  orderNumber,
+  receiptUrl,
+  companyName = BRAND_NAME,
+}: Props) {
   return (
     <EmailShell>
       <Preview>{`Your prints have arrived — ${orderNumber}`}</Preview>
-      <EmailMasthead />
+      <EmailMasthead companyName={companyName} />
 
       <Section style={{ padding: "34px 44px 8px" }}>
         <EmailEyebrow tone="positive">Delivered</EmailEyebrow>
@@ -48,7 +54,7 @@ export default function DeliveredEmail({ orderNumber, receiptUrl }: Props) {
         </Text>
       </Section>
 
-      <EmailFooter />
+      <EmailFooter companyName={companyName} />
     </EmailShell>
   );
 }

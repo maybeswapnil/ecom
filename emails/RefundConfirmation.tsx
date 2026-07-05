@@ -1,4 +1,5 @@
 import { Preview, Section, Text } from "@react-email/components";
+import { BRAND_NAME } from "@/lib/config";
 import {
   EmailShell,
   EmailMasthead,
@@ -16,6 +17,7 @@ type Props = {
   receiptUrl: string;
   amountLabel: string;
   itemsSummary?: string;
+  companyName?: string;
 };
 
 export default function RefundConfirmationEmail({
@@ -23,11 +25,12 @@ export default function RefundConfirmationEmail({
   receiptUrl,
   amountLabel,
   itemsSummary,
+  companyName = BRAND_NAME,
 }: Props) {
   return (
     <EmailShell>
       <Preview>{`Refund processed — ${orderNumber}`}</Preview>
-      <EmailMasthead />
+      <EmailMasthead companyName={companyName} />
 
       <Section style={{ padding: "34px 44px 8px" }}>
         <EmailEyebrow tone="positive">Refund confirmed</EmailEyebrow>
@@ -93,7 +96,7 @@ export default function RefundConfirmationEmail({
         </Text>
       </Section>
 
-      <EmailFooter />
+      <EmailFooter companyName={companyName} />
     </EmailShell>
   );
 }

@@ -30,6 +30,7 @@ type Props = {
   shippingLabel: string;
   totalLabel: string;
   addressLines: string[];
+  companyName?: string;
 };
 
 export default function OrderConfirmationEmail({
@@ -42,11 +43,12 @@ export default function OrderConfirmationEmail({
   shippingLabel,
   totalLabel,
   addressLines,
+  companyName = BRAND_NAME,
 }: Props) {
   return (
     <EmailShell>
-      <Preview>{`Order ${orderNumber} confirmed — ${BRAND_NAME}`}</Preview>
-      <EmailMasthead />
+      <Preview>{`Order ${orderNumber} confirmed — ${companyName}`}</Preview>
+      <EmailMasthead companyName={companyName} />
 
       <Section style={{ padding: "34px 44px 8px" }}>
         <EmailEyebrow tone="positive">Order confirmed</EmailEyebrow>
@@ -164,7 +166,7 @@ export default function OrderConfirmationEmail({
         </Text>
       </Section>
 
-      <EmailFooter />
+      <EmailFooter companyName={companyName} />
     </EmailShell>
   );
 }

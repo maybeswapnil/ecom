@@ -62,11 +62,11 @@ export function EmailShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function EmailMasthead() {
+export function EmailMasthead({ companyName = BRAND_NAME }: { companyName?: string }) {
   return (
     <Section style={{ padding: "34px 44px 22px", textAlign: "center", borderBottom: `1px solid ${colors.border}` }}>
       <Text style={{ fontFamily: serif, fontSize: 22, color: colors.ink, margin: 0, letterSpacing: "0.01em" }}>
-        {BRAND_NAME}
+        {companyName}
       </Text>
       <Text
         style={{
@@ -84,10 +84,14 @@ export function EmailMasthead() {
   );
 }
 
-export function EmailFooter() {
+export function EmailFooter({
+  companyName = BRAND_NAME,
+}: {
+  companyName?: string;
+}) {
   return (
     <Section style={{ padding: "24px 44px 32px", borderTop: `1px solid ${colors.border}`, textAlign: "center" }}>
-      <Text style={{ fontFamily: serif, fontSize: 15, color: colors.inkSoft, margin: 0 }}>{BRAND_NAME}</Text>
+      <Text style={{ fontFamily: serif, fontSize: 15, color: colors.inkSoft, margin: 0 }}>{companyName}</Text>
       <Text style={{ marginTop: 6, fontSize: "12.5px", lineHeight: "1.6", color: colors.faint, margin: "6px 0 0" }}>
         Fine-art photographic prints, framed by hand
         <br />
@@ -105,7 +109,7 @@ export function EmailFooter() {
         </Link>
       </Section>
       <Text style={{ marginTop: 16, fontSize: 11, color: colors.faintSoft, margin: "16px 0 0" }}>
-        Payments by Razorpay · © 2026 {BRAND_NAME} · Made in India
+        Payments by Razorpay · © 2026 {companyName} · Made in India
       </Text>
     </Section>
   );

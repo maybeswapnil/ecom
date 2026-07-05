@@ -1,4 +1,5 @@
 import { Preview, Section, Text } from "@react-email/components";
+import { BRAND_NAME } from "@/lib/config";
 import {
   EmailShell,
   EmailMasthead,
@@ -19,6 +20,7 @@ type Props = {
   itemsSummary: string;
   estimatedArrival?: string;
   trackingUrl?: string;
+  companyName?: string;
 };
 
 export default function ShippingConfirmationEmail({
@@ -29,11 +31,12 @@ export default function ShippingConfirmationEmail({
   itemsSummary,
   estimatedArrival,
   trackingUrl,
+  companyName = BRAND_NAME,
 }: Props) {
   return (
     <EmailShell>
       <Preview>{`Your print is on its way — ${orderNumber}`}</Preview>
-      <EmailMasthead />
+      <EmailMasthead companyName={companyName} />
 
       <Section style={{ padding: "34px 44px 8px" }}>
         <EmailEyebrow>On its way</EmailEyebrow>
@@ -78,7 +81,7 @@ export default function ShippingConfirmationEmail({
         </Text>
       </Section>
 
-      <EmailFooter />
+      <EmailFooter companyName={companyName} />
     </EmailShell>
   );
 }

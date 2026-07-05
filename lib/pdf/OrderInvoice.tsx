@@ -85,6 +85,10 @@ export type InvoiceProps = {
   shippingPaise: number;
   discountPaise: number;
   totalPaise: number;
+  companyName: string;
+  companyAddressLines: string[];
+  supportEmail: string;
+  supportPhone: string;
 };
 
 export function OrderInvoiceDocument({
@@ -97,6 +101,10 @@ export function OrderInvoiceDocument({
   shippingPaise,
   discountPaise,
   totalPaise,
+  companyName,
+  companyAddressLines,
+  supportEmail,
+  supportPhone,
 }: InvoiceProps) {
   return (
     <Document>
@@ -105,7 +113,15 @@ export function OrderInvoiceDocument({
           <View>
             <Text style={styles.brand}>{BRAND_NAME}</Text>
             <Text style={styles.brandSub}>Est. 2026 · Framed in India</Text>
-            <Text style={styles.companyBlock}>{BRAND_NAME}</Text>
+            <Text style={styles.companyBlock}>
+              {companyName}
+              {companyAddressLines.map((line) => (
+                <Text key={line}>
+                  {"\n"}
+                  {line}
+                </Text>
+              ))}
+            </Text>
           </View>
           <View>
             <Text style={styles.invoiceTitle}>Invoice</Text>
@@ -197,8 +213,8 @@ export function OrderInvoiceDocument({
         <Text style={styles.thanks}>Thank you for supporting handmade prints.</Text>
 
         <Text style={styles.footer}>
-          {BRAND_NAME} · printscompany.in · info@printscompany.in · Payments by Razorpay · Made in
-          India
+          {companyName} · printscompany.in · {supportEmail}
+          {supportPhone ? ` · ${supportPhone}` : ""} · Payments by Razorpay · Made in India
         </Text>
       </Page>
     </Document>

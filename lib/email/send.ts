@@ -102,8 +102,10 @@ export async function sendAdminNewOrderEmail(params: {
   const resend = client();
   if (!resend) return { sent: false, reason: "RESEND_API_KEY is not configured" };
 
-  const to = process.env.ADMIN_NOTIFY_EMAIL;
-  if (!to) return { sent: false, reason: "ADMIN_NOTIFY_EMAIL is not configured" };
+  const to = process.env.ADMIN_NOTIFY_EMAIL?.split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+  if (!to || to.length === 0) return { sent: false, reason: "ADMIN_NOTIFY_EMAIL is not configured" };
 
   const { error } = await resend.emails.send({
     from: FROM,

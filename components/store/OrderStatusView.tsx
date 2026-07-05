@@ -243,7 +243,7 @@ export function OrderStatusView({
         </Link>
         <div className="text-[12.5px] text-faint">
           Ordered on {formatOrderDate(createdAt)} · Questions?{" "}
-          <span className="text-ink">info@swapnilsharma.in</span>
+          <span className="text-ink">info@printscompany.in</span>
         </div>
       </div>
     </div>

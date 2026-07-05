@@ -44,7 +44,7 @@ export default function OrderConfirmationEmail({
             We&rsquo;ll dispatch within 3–4 days. Track your order any time: {receiptUrl}
           </Text>
           <Text style={{ color: "#B4AA99", fontSize: 13 }}>
-            Questions? Write to info@swapnilsharma.in
+            Questions? Write to info@printscompany.in
           </Text>
         </Container>
       </Body>

@@ -13,7 +13,7 @@ function client(): Resend | null {
   return new Resend(key);
 }
 
-const FROM = process.env.EMAIL_FROM ?? `${BRAND_NAME} <info@swapnilsharma.in>`;
+const FROM = process.env.EMAIL_FROM ?? `${BRAND_NAME} <info@printscompany.in>`;
 
 export async function sendOrderConfirmationEmail(params: {
   orderNumber: string;

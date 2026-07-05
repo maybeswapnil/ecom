@@ -38,7 +38,7 @@ export function PolicyPage({ active }: { active: PolicyKey }) {
         ))}
         <div className="mt-7.5 text-[12.5px] text-faint">
           Last updated 12 May 2026 · Questions?{" "}
-          <span className="text-ink">info@swapnilsharma.in</span>
+          <span className="text-ink">info@printscompany.in</span>
         </div>
       </div>
     </section>

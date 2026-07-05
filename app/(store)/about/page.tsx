@@ -59,7 +59,7 @@ export default function AboutPage() {
           </p>
           <p className="text-base leading-[1.75] text-muted-soft m-0 mb-7">
             If you have a question about a print, a wall, or a size — write to me at{" "}
-            <span className="border-b border-border-input">info@swapnilsharma.in</span>. I answer
+            <span className="border-b border-border-input">info@printscompany.in</span>. I answer
             everything myself.
           </p>
           <div className="font-display italic text-2xl text-ink mb-10">— Swapnil Sharma</div>

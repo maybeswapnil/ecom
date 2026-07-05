@@ -36,7 +36,7 @@ export default async function HomePage() {
       "@type": "Organization",
       name: BRAND_NAME,
       url: SITE_URL,
-      email: "info@swapnilsharma.in",
+      email: "info@printscompany.in",
     },
     {
       "@context": "https://schema.org",

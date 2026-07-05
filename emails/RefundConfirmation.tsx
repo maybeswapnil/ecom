@@ -20,7 +20,7 @@ export default function RefundConfirmationEmail({ orderNumber, amountLabel }: Pr
             It should reflect in your original payment method within 5–7 business days.
           </Text>
           <Text style={{ color: "#B4AA99", fontSize: 13 }}>
-            Questions? Write to info@swapnilsharma.in
+            Questions? Write to info@printscompany.in
           </Text>
         </Container>
       </Body>

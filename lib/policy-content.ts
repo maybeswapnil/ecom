@@ -33,7 +33,7 @@ export const policyDocs: Record<PolicyKey, { title: string; paras: string[] }> =
     paras: [
       "We collect only what we need to fulfil your order — your name, contact details and shipping address — and we never sell it.",
       "Payments are handled entirely by Razorpay; we never see or store your card or UPI details.",
-      "You can ask us to delete your data at any time by writing to info@swapnilsharma.in.",
+      "You can ask us to delete your data at any time by writing to info@printscompany.in.",
     ],
   },
   terms: {
@@ -47,7 +47,7 @@ export const policyDocs: Record<PolicyKey, { title: string; paras: string[] }> =
   contact: {
     title: "Contact",
     paras: [
-      "The fastest way to reach us is email — info@swapnilsharma.in — and the photographer answers personally, usually within a day.",
+      "The fastest way to reach us is email — info@printscompany.in — and the photographer answers personally, usually within a day.",
       "For questions about a live order, include your order number (it starts with PC- or FP-).",
       "Workshop: Indiranagar, Bengaluru 560038. By appointment only.",
     ],

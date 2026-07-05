@@ -27,7 +27,7 @@ export default function ShippingConfirmationEmail({
           {trackingUrl && <Text style={{ color: "#1C1915" }}>Track: {trackingUrl}</Text>}
           <Text style={{ color: "#6E6557" }}>Full order details: {receiptUrl}</Text>
           <Text style={{ color: "#B4AA99", fontSize: 13 }}>
-            Questions? Write to info@swapnilsharma.in
+            Questions? Write to info@printscompany.in
           </Text>
         </Container>
       </Body>

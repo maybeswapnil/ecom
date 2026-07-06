@@ -68,6 +68,46 @@ export async function updateProduct(
   return { ok: true };
 }
 
+export async function deleteProduct(productId: string) {
+  await requireAdmin();
+  const supabase = createAdminClient();
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("slug, product_variants(id)")
+    .eq("id", productId)
+    .maybeSingle();
+  if (!product) return { error: "Product not found." };
+
+  const variantIds = (product.product_variants ?? []).map((v) => v.id);
+  if (variantIds.length > 0) {
+    const { count } = await supabase
+      .from("order_items")
+      .select("id", { count: "exact", head: true })
+      .in("variant_id", variantIds);
+    if (count && count > 0) {
+      return {
+        error:
+          "This product has order history and can't be deleted. Archive it instead to remove it from the storefront.",
+      };
+    }
+  }
+
+  const { error: variantError } = await supabase
+    .from("product_variants")
+    .delete()
+    .eq("product_id", productId);
+  if (variantError) return { error: variantError.message };
+
+  const { error } = await supabase.from("products").delete().eq("id", productId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/products");
+  updateTag(`product:${product.slug}`);
+  updateTag("shop-grid");
+  return { ok: true };
+}
+
 export async function setProductStatus(productId: string, status: "draft" | "live" | "archived") {
   await requireAdmin();
   const supabase = createAdminClient();

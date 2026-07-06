@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NewProductForm } from "@/components/admin/NewProductForm";
+import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
 
 export const dynamic = "force-dynamic";
 
@@ -56,16 +57,19 @@ export default async function AdminProductsPage() {
                   <td className="px-4 py-3 text-muted">{variants.length}</td>
                   <td className="px-4 py-3 text-muted">{stockSum}</td>
                   <td className="px-4 py-3 text-right">
-                    {p.status === "live" && (
-                      <a
-                        href={`/prints/${p.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-muted hover:text-ink underline"
-                      >
-                        View live
-                      </a>
-                    )}
+                    <div className="flex items-center justify-end gap-3">
+                      {p.status === "live" && (
+                        <a
+                          href={`/prints/${p.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-muted hover:text-ink underline"
+                        >
+                          View live
+                        </a>
+                      )}
+                      <DeleteProductButton productId={p.id} title={p.title} />
+                    </div>
                   </td>
                 </tr>
               );

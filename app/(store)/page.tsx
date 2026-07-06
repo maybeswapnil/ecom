@@ -90,7 +90,7 @@ export default async function HomePage() {
               fill
               priority
               sizes="(max-width: 768px) 100vw, 440px"
-              className="object-cover"
+              className="object-cover object-bottom"
             />
           </div>
           <div className="flex justify-between items-baseline mt-4.5 px-0.5">

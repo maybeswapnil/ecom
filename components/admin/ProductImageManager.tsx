@@ -17,6 +17,9 @@ export function ProductImageManager({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [localImages, setLocalImages] = useState<ProductImage[]>(images);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -28,20 +31,31 @@ export function ProductImageManager({
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
     setError(null);
     setUploading(true);
+    setUploadProgress({ done: 0, total: files.length });
 
-    const formData = new FormData();
-    formData.append("file", file);
-    const result = await uploadProductImage(productId, formData);
-    setUploading(false);
-    if (result.error || !result.url) {
-      setError(result.error ?? "Upload failed");
-      return;
+    const uploaded: ProductImage[] = [];
+    const failures: string[] = [];
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await uploadProductImage(productId, formData);
+      if (result.error || !result.url) {
+        failures.push(`${file.name}: ${result.error ?? "Upload failed"}`);
+      } else {
+        uploaded.push({ url: result.url, alt: "" });
+      }
+      setUploadProgress((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
     }
-    await persist([...localImages, { url: result.url, alt: "" }]);
+
+    setUploading(false);
+    setUploadProgress(null);
+    if (failures.length > 0) setError(failures.join("; "));
+    if (uploaded.length > 0) await persist([...localImages, ...uploaded]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -77,8 +91,8 @@ export function ProductImageManager({
     <div className="border border-hairline bg-surface rounded-xl p-5">
       <div className="text-sm font-semibold mb-3">Images</div>
       <div className="text-xs text-muted mb-3">
-        Drag to reorder. First image is the hero/cover shown on the shop grid. Alt text is
-        required for every image.
+        Select multiple files to upload them all at once. Drag to reorder. First image is the
+        hero/cover shown on the shop grid. Alt text is required for every image.
       </div>
       {missingAlt > 0 && (
         <div className="text-xs text-red-700 mb-3">
@@ -132,11 +146,16 @@ export function ProductImageManager({
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        multiple
         onChange={handleFileSelect}
         disabled={uploading}
         className="text-xs"
       />
-      {uploading && <div className="text-xs text-muted mt-2">Uploading…</div>}
+      {uploadProgress && (
+        <div className="text-xs text-muted mt-2">
+          Uploading {uploadProgress.done}/{uploadProgress.total}…
+        </div>
+      )}
     </div>
   );
 }

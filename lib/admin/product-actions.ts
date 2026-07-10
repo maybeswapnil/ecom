@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { ProductImage } from "@/lib/types";
 
 export async function createProduct(input: {
   slug: string;
@@ -129,10 +130,7 @@ export async function setProductStatus(productId: string, status: "draft" | "liv
   return { ok: true };
 }
 
-export async function updateProductImages(
-  productId: string,
-  images: { url: string; alt: string }[]
-) {
+export async function updateProductImages(productId: string, images: ProductImage[]) {
   await requireAdmin();
   const supabase = createAdminClient();
 

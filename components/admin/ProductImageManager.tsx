@@ -4,12 +4,22 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadProductImage, updateProductImages } from "@/lib/admin/product-actions";
-import type { ProductImage } from "@/lib/types";
+import type { ProductImage, ProductImageRole } from "@/lib/types";
+import { PRODUCT_IMAGE_ROLE_LABELS } from "@/lib/types";
 
 // Vercel serverless functions hard-cap request bodies at 4.5MB platform-wide
 // (no app config can raise it), so files must stay comfortably under that —
 // checked client-side to avoid ever sending a request Vercel will 413 anyway.
 const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+
+const ROLE_ORDER: ProductImageRole[] = ["framed", "print", "detail", "room"];
+
+const ROLE_HELP: Record<ProductImageRole, string> = {
+  framed: "Product page's main tab — the print in its frame, straight-on.",
+  print: "Flat, unframed print — shows the image itself with no frame.",
+  detail: "Close-up crop of paper texture or a corner of the print.",
+  room: "The framed print shown hanging in a room or lifestyle setting.",
+};
 
 export function ProductImageManager({
   productId,
@@ -82,6 +92,13 @@ export function ProductImageManager({
     persist(localImages);
   }
 
+  function handleRoleChange(index: number, role: string) {
+    const next = localImages.map((img, i) =>
+      i === index ? { ...img, role: (role || undefined) as ProductImageRole | undefined } : img
+    );
+    persist(next);
+  }
+
   function handleDragStart(index: number) {
     setDragIndex(index);
   }
@@ -96,15 +113,36 @@ export function ProductImageManager({
   }
 
   const missingAlt = localImages.filter((img) => !img.alt.trim()).length;
+  const hasFramedRole = localImages.some((img) => img.role === "framed");
+  const usedRoles = new Set(localImages.map((img) => img.role).filter(Boolean));
 
   return (
     <div className="border border-hairline bg-surface rounded-xl p-5">
       <div className="text-sm font-semibold mb-3">Images</div>
-      <div className="text-xs text-muted mb-3">
-        Select multiple files to upload them all at once (4MB max per image). Drag to reorder.
-        First image is the hero/cover shown on the shop grid. Alt text is required for every
-        image.
+      <div className="text-xs text-muted mb-3 leading-relaxed">
+        Select multiple files to upload them all at once (4MB max per image). For each image,
+        choose what it shows using the dropdown below it — this controls which tab it appears
+        under on the product page:
       </div>
+      <ul className="text-xs text-muted mb-3 leading-relaxed list-none flex flex-col gap-1">
+        {ROLE_ORDER.map((role) => (
+          <li key={role}>
+            <span className="font-medium text-ink">{PRODUCT_IMAGE_ROLE_LABELS[role]}</span> —{" "}
+            {ROLE_HELP[role]}
+          </li>
+        ))}
+      </ul>
+      <div className="text-xs text-muted mb-3">
+        Images left as &ldquo;Unassigned&rdquo; are stored but won&rsquo;t appear on any tab.
+        Drag to reorder. Alt text is required for every image.
+      </div>
+
+      {!hasFramedRole && localImages.length > 0 && (
+        <div className="text-xs text-red-700 mb-3">
+          No image is set as &ldquo;Framed hero&rdquo; — the product page&rsquo;s main image will
+          be blank until one is assigned.
+        </div>
+      )}
       {missingAlt > 0 && (
         <div className="text-xs text-red-700 mb-3">
           {missingAlt} image(s) missing alt text.
@@ -124,8 +162,22 @@ export function ProductImageManager({
             <div className="relative w-14 h-14 flex-none">
               <Image src={img.url} alt={img.alt || ""} fill className="object-cover rounded" />
             </div>
-            <div className="flex-1 min-w-0 flex flex-col gap-1">
-              <div className="text-xs text-muted">{i === 0 ? "Hero image" : `Image ${i + 1}`}</div>
+            <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+              <select
+                value={img.role ?? ""}
+                onChange={(e) => handleRoleChange(i, e.target.value)}
+                className={`w-full h-8 px-2 text-xs border rounded bg-paper ${
+                  img.role ? "border-border-input" : "border-amber-400"
+                }`}
+              >
+                <option value="">Unassigned</option>
+                {ROLE_ORDER.map((role) => (
+                  <option key={role} value={role} disabled={usedRoles.has(role) && img.role !== role}>
+                    {PRODUCT_IMAGE_ROLE_LABELS[role]}
+                    {usedRoles.has(role) && img.role !== role ? " (already used)" : ""}
+                  </option>
+                ))}
+              </select>
               <input
                 value={img.alt}
                 onChange={(e) => handleAltChange(i, e.target.value)}

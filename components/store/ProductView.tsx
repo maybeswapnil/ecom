@@ -69,9 +69,17 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
 
   if (!activeVariant) return null;
 
-  const mainImage = product.images[0];
+  const framedImage = product.images.find((img) => img.role === "framed") ?? product.images[0];
+  const mainImage = framedImage;
   const mainImg = mainImage?.url ?? "";
   const mainImgAlt = mainImage?.alt || product.title;
+
+  const printImage = product.images.find((img) => img.role === "print") ?? framedImage;
+  const detailImage = product.images.find((img) => img.role === "detail") ?? framedImage;
+  const roomImage = product.images.find((img) => img.role === "room");
+
+  const viewImages = [framedImage, printImage, detailImage, roomImage];
+
   const finish = FINISH_SWATCH[finishName] ?? FINISH_SWATCH.Black;
   const dims = SIZE_DIMENSIONS[sizeLabel] ?? SIZE_DIMENSIONS.A4;
 
@@ -130,21 +138,25 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
                 </div>
               </div>
             )}
-            {viewIdx === 1 && (
+            {viewIdx === 1 && printImage?.url && (
               <div className="w-full max-w-[640px] shadow-[0_30px_60px_-40px_rgba(28,25,21,0.55)]">
                 <div className="relative w-full" style={{ aspectRatio: ratio }}>
-                  {mainImg && (
-                    <Image src={mainImg} alt={mainImgAlt} fill sizes="640px" className="object-cover" />
-                  )}
+                  <Image
+                    src={printImage.url}
+                    alt={printImage.alt || `${product.title} — flat print`}
+                    fill
+                    sizes="640px"
+                    className="object-cover"
+                  />
                 </div>
               </div>
             )}
-            {viewIdx === 2 && mainImg && (
+            {viewIdx === 2 && detailImage?.url && (
               <div className="w-full max-w-[640px] aspect-square overflow-hidden shadow-[0_30px_60px_-40px_rgba(28,25,21,0.55)]">
                 <div className="relative w-full h-full">
                   <Image
-                    src={mainImg}
-                    alt="Paper detail"
+                    src={detailImage.url}
+                    alt={detailImage.alt || `${product.title} — paper detail`}
                     fill
                     sizes="640px"
                     className="object-cover scale-[2.4]"
@@ -152,7 +164,20 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
                 </div>
               </div>
             )}
-            {viewIdx === 3 && (
+            {viewIdx === 3 && roomImage?.url && (
+              <div className="w-full max-w-[640px] aspect-[4/3] shadow-[0_30px_60px_-40px_rgba(28,25,21,0.55)]">
+                <div className="relative w-full h-full">
+                  <Image
+                    src={roomImage.url}
+                    alt={roomImage.alt || `${product.title} — in room`}
+                    fill
+                    sizes="640px"
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+            )}
+            {viewIdx === 3 && !roomImage?.url && (
               <div className="w-full max-w-[640px] aspect-[4/3] relative bg-image-placeholder border border-hairline flex items-center justify-center text-muted text-sm">
                 Room view coming soon
               </div>
@@ -166,9 +191,9 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
                 className="flex-none [scroll-snap-align:start] cursor-pointer bg-transparent border-none p-0 flex flex-col gap-1.5 items-center"
                 style={{ opacity: i === viewIdx ? 1 : 0.55 }}
               >
-                {i < 3 && mainImg ? (
+                {viewImages[i]?.url ? (
                   <div className="relative w-16 h-16">
-                    <Image src={mainImg} alt={label} fill sizes="64px" className="object-cover" />
+                    <Image src={viewImages[i]!.url} alt={label} fill sizes="64px" className="object-cover" />
                   </div>
                 ) : (
                   <span className="w-16 h-16 flex items-center justify-center bg-surface-sunken text-muted text-lg">

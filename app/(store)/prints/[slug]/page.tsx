@@ -19,6 +19,7 @@ export async function generateMetadata({
   const description =
     product.description ??
     `${product.title}, a limited-edition framed photographic print. From ₹${fromPrice.toLocaleString("en-IN")}.`;
+  const heroImage = product.images.find((img) => img.role === "framed") ?? product.images[0];
 
   return {
     title,
@@ -27,7 +28,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: product.images[0] ? [product.images[0].url] : [],
+      images: heroImage ? [heroImage.url] : [],
     },
   };
 }

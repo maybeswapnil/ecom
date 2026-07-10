@@ -1,6 +1,16 @@
+export type ProductImageRole = "framed" | "print" | "detail" | "room";
+
+export const PRODUCT_IMAGE_ROLE_LABELS: Record<ProductImageRole, string> = {
+  framed: "Framed hero",
+  print: "Flat print",
+  detail: "Detail close-up",
+  room: "In room",
+};
+
 export type ProductImage = {
   url: string;
   alt: string;
+  role?: ProductImageRole;
 };
 
 export type Product = {

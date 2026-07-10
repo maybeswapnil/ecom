@@ -5,7 +5,7 @@ import { distinctSizes } from "@/lib/catalog";
 import { formatPaise } from "@/lib/money";
 
 function firstImage(product: ProductWithVariants) {
-  return product.images[0];
+  return product.images.find((img) => img.role === "framed") ?? product.images[0];
 }
 
 function ratioFor(product: ProductWithVariants): string {

@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  experimental: {
+    // Server Actions default to a 1MB body limit — too small for the product
+    // image upload action, which validates files up to 10MB itself.
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   // Trust the ngrok tunnel host in dev so HMR/websocket requests aren't rejected as cross-origin.
   allowedDevOrigins: ["mallard-subtle-grubworm.ngrok-free.app"],
   images: {

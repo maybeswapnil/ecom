@@ -5,14 +5,13 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   experimental: {
-    // Server Actions default to a 1MB body limit — too small for the product
-    // image upload action, which validates files up to 10MB itself.
+    // Server Actions default to a 1MB body limit. Raised to match our real
+    // ceiling (4mb) — Vercel serverless functions hard-cap request bodies at
+    // 4.5MB platform-wide, which no Next.js config can override, so the
+    // upload validation limit in product-actions.ts must stay under that.
     serverActions: {
-      bodySizeLimit: "10mb",
+      bodySizeLimit: "4mb",
     },
-    // Requests also pass through proxy.ts, which has its own separate body
-    // size cap (distinct from serverActions.bodySizeLimit above).
-    proxyClientMaxBodySize: "10mb",
   },
   // Trust the ngrok tunnel host in dev so HMR/websocket requests aren't rejected as cross-origin.
   allowedDevOrigins: ["mallard-subtle-grubworm.ngrok-free.app"],

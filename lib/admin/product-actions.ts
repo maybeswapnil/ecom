@@ -160,8 +160,8 @@ export async function uploadProductImage(productId: string, formData: FormData) 
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
     return { error: "Only JPG, PNG, or WebP images are allowed." };
   }
-  if (file.size > 10 * 1024 * 1024) {
-    return { error: "Image must be 10MB or smaller." };
+  if (file.size > 4 * 1024 * 1024) {
+    return { error: "Image must be 4MB or smaller." };
   }
 
   const ext = file.name.split(".").pop();

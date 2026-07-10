@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import { uploadProductImage, updateProductImages } from "@/lib/admin/product-actions";
 import type { ProductImage } from "@/lib/types";
 
+// Vercel serverless functions hard-cap request bodies at 4.5MB platform-wide
+// (no app config can raise it), so files must stay comfortably under that —
+// checked client-side to avoid ever sending a request Vercel will 413 anyway.
+const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+
 export function ProductImageManager({
   productId,
   images,
@@ -41,6 +46,11 @@ export function ProductImageManager({
     const failures: string[] = [];
 
     for (const file of files) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        failures.push(`${file.name}: Image must be 4MB or smaller.`);
+        setUploadProgress((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
+        continue;
+      }
       const formData = new FormData();
       formData.append("file", file);
       const result = await uploadProductImage(productId, formData);
@@ -91,8 +101,9 @@ export function ProductImageManager({
     <div className="border border-hairline bg-surface rounded-xl p-5">
       <div className="text-sm font-semibold mb-3">Images</div>
       <div className="text-xs text-muted mb-3">
-        Select multiple files to upload them all at once. Drag to reorder. First image is the
-        hero/cover shown on the shop grid. Alt text is required for every image.
+        Select multiple files to upload them all at once (4MB max per image). Drag to reorder.
+        First image is the hero/cover shown on the shop grid. Alt text is required for every
+        image.
       </div>
       {missingAlt > 0 && (
         <div className="text-xs text-red-700 mb-3">

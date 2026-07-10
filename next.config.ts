@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
+    // Requests also pass through proxy.ts, which has its own separate body
+    // size cap (distinct from serverActions.bodySizeLimit above).
+    proxyClientMaxBodySize: "10mb",
   },
   // Trust the ngrok tunnel host in dev so HMR/websocket requests aren't rejected as cross-origin.
   allowedDevOrigins: ["mallard-subtle-grubworm.ngrok-free.app"],

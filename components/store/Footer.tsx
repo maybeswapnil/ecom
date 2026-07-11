@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BRAND_NAME } from "@/lib/config";
+import { BRAND_NAME, SOCIAL_LINKS } from "@/lib/config";
 
 const footerColumns = [
   {
@@ -18,6 +18,11 @@ const footerColumns = [
       { label: "Contact", href: "/contact" },
     ],
   },
+];
+
+const socialLinks = [
+  { label: "Instagram", href: SOCIAL_LINKS.instagram },
+  { label: "Pexels", href: SOCIAL_LINKS.pexels },
 ];
 
 export function Footer() {
@@ -49,6 +54,24 @@ export function Footer() {
               </div>
             </div>
           ))}
+          <div>
+            <div className="text-[10.5px] tracking-[0.2em] uppercase text-faint font-semibold mb-4">
+              Follow
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {socialLinks.map((lk) => (
+                <a
+                  key={lk.href}
+                  href={lk.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-left p-0 font-body text-[13.5px] text-muted-soft hover:text-ink"
+                >
+                  {lk.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
       <div className="max-w-[1320px] mx-auto px-7 pb-7 flex flex-wrap gap-2.5 justify-between text-xs text-faint">

@@ -13,3 +13,8 @@ export const TRACKING_SWEEP_HOURS = 6;
 
 export const BRAND_NAME = "Prints Company";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+export const SOCIAL_LINKS = {
+  instagram: "https://www.instagram.com/hellochemo/",
+  pexels: "https://www.pexels.com/@hellochemo/",
+};

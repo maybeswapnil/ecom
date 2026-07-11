@@ -3,7 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { getFeaturedProducts } from "@/lib/catalog";
 import { ProductCard } from "@/components/store/ProductCard";
-import { BRAND_NAME, SITE_URL } from "@/lib/config";
+import { BRAND_NAME, SITE_URL, SOCIAL_LINKS } from "@/lib/config";
 
 const HOME_DESCRIPTION =
   "A small collection of limited-edition framed photographic prints from a decade spent wandering India. Archival paper, hand-framed, shipped ready to hang.";
@@ -36,6 +36,7 @@ export default async function HomePage() {
       name: BRAND_NAME,
       url: SITE_URL,
       email: "info@printscompany.in",
+      sameAs: [SOCIAL_LINKS.instagram, SOCIAL_LINKS.pexels],
     },
     {
       "@context": "https://schema.org",

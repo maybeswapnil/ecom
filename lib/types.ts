@@ -22,6 +22,8 @@ export type Product = {
   tags: string[];
   images: ProductImage[];
   status: "draft" | "live" | "archived";
+  is_featured: boolean;
+  featured_order: number | null;
 };
 
 export type ProductVariant = {

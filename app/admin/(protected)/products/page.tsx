@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NewProductForm } from "@/components/admin/NewProductForm";
 import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
+import { FeaturedProductsPicker } from "@/components/admin/FeaturedProductsPicker";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,10 @@ export default async function AdminProductsPage() {
   const supabase = createAdminClient();
   const { data: products } = await supabase
     .from("products")
-    .select("id, slug, title, status, product_variants(id, stock_qty)")
+    .select("id, slug, title, status, is_featured, featured_order, product_variants(id, stock_qty)")
     .order("created_at", { ascending: false });
+
+  const liveProducts = (products ?? []).filter((p) => p.status === "live");
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,6 +27,8 @@ export default async function AdminProductsPage() {
         <h1 className="font-display text-3xl font-medium">Products</h1>
         <NewProductForm />
       </div>
+
+      <FeaturedProductsPicker products={liveProducts} />
 
       <div className="border border-hairline rounded-xl overflow-hidden bg-surface">
         <table className="w-full text-sm">

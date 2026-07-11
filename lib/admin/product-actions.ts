@@ -109,6 +109,37 @@ export async function deleteProduct(productId: string) {
   return { ok: true };
 }
 
+const FEATURED_MAX = 6;
+
+export async function setFeaturedProducts(productIds: string[]) {
+  await requireAdmin();
+  const supabase = createAdminClient();
+
+  const uniqueIds = [...new Set(productIds)];
+  if (uniqueIds.length > FEATURED_MAX) {
+    return { error: `Choose at most ${FEATURED_MAX} featured products.` };
+  }
+
+  const { error: clearError } = await supabase
+    .from("products")
+    .update({ is_featured: false, featured_order: null })
+    .eq("is_featured", true);
+  if (clearError) return { error: clearError.message };
+
+  for (const [index, productId] of uniqueIds.entries()) {
+    const { error } = await supabase
+      .from("products")
+      .update({ is_featured: true, featured_order: index + 1 })
+      .eq("id", productId);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  updateTag("shop-grid");
+  return { ok: true };
+}
+
 export async function setProductStatus(productId: string, status: "draft" | "live" | "archived") {
   await requireAdmin();
   const supabase = createAdminClient();

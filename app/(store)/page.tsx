@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getLiveProducts } from "@/lib/catalog";
+import { getFeaturedProducts } from "@/lib/catalog";
 import { ProductCard } from "@/components/store/ProductCard";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
@@ -27,8 +27,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const products = await getLiveProducts();
-  const featured = products.slice(0, 3);
+  const featured = await getFeaturedProducts();
 
   const jsonLd = [
     {

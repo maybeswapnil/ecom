@@ -13,6 +13,42 @@ export async function getLiveProducts(): Promise<ProductWithVariants[]> {
   return (data ?? []) as ProductWithVariants[];
 }
 
+const FEATURED_MAX = 6;
+const FEATURED_FALLBACK_MIN = 3;
+
+/** Home page "From the collection" — admin-picked products (1 to FEATURED_MAX,
+ *  in featured_order), topped up with the most recent non-featured live
+ *  products only if the admin has picked none at all, so the section is never
+ *  empty. Once at least one product is featured, we show exactly that
+ *  selection — no silent padding to a fixed count. */
+export async function getFeaturedProducts(): Promise<ProductWithVariants[]> {
+  const supabase = await createClient();
+
+  const { data: featured, error: featuredError } = await supabase
+    .from("products")
+    .select("*, product_variants(*)")
+    .eq("status", "live")
+    .eq("is_featured", true)
+    .order("featured_order", { ascending: true })
+    .limit(FEATURED_MAX);
+
+  if (featuredError) throw new Error(`Failed to load featured products: ${featuredError.message}`);
+
+  const picked = (featured ?? []) as ProductWithVariants[];
+  if (picked.length > 0) return picked;
+
+  const { data: fallback, error: fallbackError } = await supabase
+    .from("products")
+    .select("*, product_variants(*)")
+    .eq("status", "live")
+    .order("created_at", { ascending: false })
+    .limit(FEATURED_FALLBACK_MIN);
+
+  if (fallbackError) throw new Error(`Failed to load fallback products: ${fallbackError.message}`);
+
+  return (fallback ?? []) as ProductWithVariants[];
+}
+
 export async function getProductBySlug(slug: string): Promise<ProductWithVariants | null> {
   const supabase = await createClient();
   const { data, error } = await supabase

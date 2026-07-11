@@ -26,11 +26,12 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
   return data as ProductWithVariants | null;
 }
 
+const SIZE_ORDER = ["A4", "A3", "A2", "A1", "30x40", "40x50", "50x70"];
+
 export function sortedVariants(product: ProductWithVariants) {
-  const sizeOrder = ["A4", "A3", "A2", "A1"];
   return [...product.product_variants]
     .filter((v) => v.active)
-    .sort((a, b) => sizeOrder.indexOf(a.size_label) - sizeOrder.indexOf(b.size_label));
+    .sort((a, b) => SIZE_ORDER.indexOf(a.size_label) - SIZE_ORDER.indexOf(b.size_label));
 }
 
 export function distinctSizes(product: ProductWithVariants) {

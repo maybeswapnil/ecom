@@ -6,11 +6,11 @@ import { upsertVariant } from "@/lib/admin/product-actions";
 import { formatPaise } from "@/lib/money";
 import type { ProductVariant } from "@/lib/types";
 
-const SIZES = ["A4", "A3", "A2", "A1"];
-const FINISHES = ["Black", "White", "Oak", "Walnut"];
+const SIZES = ["A4", "A3", "A2", "A1", "30x40", "40x50", "50x70"];
+const FINISHES = ["Black", "White", "Oak", "Walnut", "Beige"];
 
 function suggestSku(slug: string, size: string, finish: string): string {
-  return `PC-${slug.toUpperCase()}-${size}-${finish.slice(0, 3).toUpperCase()}`;
+  return `PC-${slug.toUpperCase()}-${size.toUpperCase()}-${finish.slice(0, 3).toUpperCase()}`;
 }
 
 export function VariantMatrixEditor({

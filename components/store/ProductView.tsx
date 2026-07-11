@@ -13,13 +13,17 @@ const SIZE_DIMENSIONS: Record<string, { cm: string; in: string; scale: number }>
   A3: { cm: "30 × 42 cm", in: "12 × 17 in", scale: 0.55 },
   A2: { cm: "42 × 59 cm", in: "17 × 23 in", scale: 0.75 },
   A1: { cm: "59 × 84 cm", in: "23 × 33 in", scale: 1 },
+  "30x40": { cm: "30 × 40 cm", in: "12 × 16 in", scale: 0.5 },
+  "40x50": { cm: "40 × 50 cm", in: "16 × 20 in", scale: 0.65 },
+  "50x70": { cm: "50 × 70 cm", in: "20 × 28 in", scale: 0.85 },
 };
 
-const FINISH_SWATCH: Record<string, { hex: string; keyline?: boolean }> = {
-  Black: { hex: "#2A2723" },
-  White: { hex: "#F2EFE8", keyline: true },
-  Oak: { hex: "#C6A671" },
-  Walnut: { hex: "#63452F" },
+const FINISH_SWATCH: Record<string, { hex: string; keyline?: boolean; material: string }> = {
+  Black: { hex: "#2A2723", material: "aluminium" },
+  White: { hex: "#F2EFE8", keyline: true, material: "aluminium" },
+  Oak: { hex: "#C6A671", material: "solid wood" },
+  Walnut: { hex: "#63452F", material: "solid wood" },
+  Beige: { hex: "#D3B978", material: "solid wood" },
 };
 
 const VIEW_LABELS = ["Framed", "Print", "Detail", "In room"];
@@ -372,7 +376,7 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
                 { k: "Ink", v: "Pigment, 100-year rated" },
                 {
                   k: "Frame",
-                  v: `${finishName} — ${finishName === "Oak" || finishName === "Walnut" ? "solid wood" : "aluminium"}`,
+                  v: `${finishName} — ${finish.material}`,
                 },
                 { k: "Edition", v: "Limited to 50, signed" },
               ].map((sp) => (

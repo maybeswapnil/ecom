@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isValidReceiptToken } from "@/lib/order-token";
 import { OrderStatusView } from "@/components/store/OrderStatusView";
 
-export const metadata = { title: "Order Confirmation" };
+export const metadata = { title: "Order Confirmation", robots: { index: false } };
 
 export default async function OrderPage({
   params,

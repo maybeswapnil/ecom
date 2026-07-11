@@ -17,7 +17,7 @@ type RazorpayWebhookPayload = {
   entity: string;
   event: string;
   payload: {
-    payment?: { entity: { id: string; order_id: string; error_code?: string; error_description?: string } };
+    payment?: { entity: { id: string; order_id: string; amount?: number; error_code?: string; error_description?: string } };
     order?: { entity: { id: string } };
     refund?: { entity: { id: string; payment_id: string; amount: number } };
   };
@@ -83,6 +83,22 @@ async function handlePaidTransition(
   const paymentId = event.payload.payment?.entity.id;
   if (!orderId) return;
 
+  // Guard against under/overpayment: Razorpay normally enforces payment amount == order amount,
+  // but if partial payments are ever enabled on the account a mismatched capture must not mark
+  // the order fully paid. Leave it pending and flag for manual review.
+  const paidAmount = event.payload.payment?.entity.amount;
+  if (paidAmount !== undefined) {
+    const { data: target } = await supabase
+      .from("orders")
+      .select("id, total_paise, status")
+      .eq("razorpay_order_id", orderId)
+      .maybeSingle();
+    if (target?.status === "pending" && paidAmount !== target.total_paise) {
+      await supabase.from("orders").update({ amount_mismatch: true }).eq("id", target.id);
+      return;
+    }
+  }
+
   const { data: updated } = await supabase
     .from("orders")
     .update({ status: "paid", paid_at: new Date().toISOString(), razorpay_payment_id: paymentId })
@@ -111,18 +127,12 @@ async function handlePaidTransition(
     .eq("order_id", updated.id);
 
   for (const item of items ?? []) {
-    const { data: rows } = await supabase
-      .from("product_variants")
-      .select("id, stock_qty")
-      .eq("id", item.variant_id)
-      .single();
-    if (rows && rows.stock_qty >= item.qty) {
-      await supabase
-        .from("product_variants")
-        .update({ stock_qty: rows.stock_qty - item.qty })
-        .eq("id", item.variant_id)
-        .gte("stock_qty", item.qty);
-    } else {
+    // Atomic guarded decrement (013_payment_hardening.sql) — returns null when stock is short.
+    const { data: decremented } = await supabase.rpc("decrement_stock", {
+      p_variant_id: item.variant_id,
+      p_qty: item.qty,
+    });
+    if (!decremented) {
       await supabase.from("orders").update({ oversold: true }).eq("id", updated.id);
     }
   }

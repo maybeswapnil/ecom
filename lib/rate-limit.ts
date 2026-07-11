@@ -19,6 +19,17 @@ export async function checkRateLimit(
 }
 
 export function clientIp(req: Request): string {
+  // x-real-ip is set by the platform proxy (Vercel) and cannot be spoofed by the client.
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+
+  // In x-forwarded-for the FIRST entries are client-supplied (an attacker can send their own
+  // header and the proxy appends to it), so take the LAST hop — the one the trusted proxy added.
   const forwardedFor = req.headers.get("x-forwarded-for");
-  return forwardedFor?.split(",")[0]?.trim() ?? "unknown";
+  if (forwardedFor) {
+    const hops = forwardedFor.split(",");
+    const lastHop = hops[hops.length - 1]?.trim();
+    if (lastHop) return lastHop;
+  }
+  return "unknown";
 }

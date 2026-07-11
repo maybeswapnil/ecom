@@ -2,6 +2,8 @@ import { CartPageContent } from "@/components/store/CartPageContent";
 
 export const metadata = {
   title: "Your Cart",
+  // Transactional page — robots.txt doesn't stop indexing of discovered URLs, meta noindex does.
+  robots: { index: false },
 };
 
 export default function CartPage() {

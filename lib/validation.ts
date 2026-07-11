@@ -15,7 +15,7 @@ export const checkoutFormSchema = z.object({
   phoneLocal: z
     .string()
     .min(1, "Phone number is required")
-    .regex(/^[0-9]{10}$/, "Enter a 10-digit phone number"),
+    .regex(/^[6-9][0-9]{9}$/, "Enter a valid 10-digit mobile number"),
   name: z.string().min(1, "Full name is required").max(120, "Name is too long"),
   line1: z.string().min(1, "Address is required").max(120, "Address is too long"),
   city: z.string().min(1, "City is required").max(120, "City is too long"),
@@ -55,7 +55,8 @@ export const checkoutSchema = z.object({
   customer: z.object({
     name: z.string().min(1).max(120),
     email: z.string().email(),
-    phone: z.string().regex(/^\+91[0-9]{10}$/, "Phone must be +91 followed by 10 digits"),
+    // Indian mobile numbers always start with 6-9.
+    phone: z.string().regex(/^\+91[6-9][0-9]{9}$/, "Phone must be +91 followed by a valid 10-digit mobile number"),
   }),
   address: z.object({
     line1: z.string().min(1).max(120),

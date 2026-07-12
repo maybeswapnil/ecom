@@ -169,20 +169,22 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
               </div>
             )}
             {viewIdx === 3 && roomImage?.url && (
-              <div className="w-full max-w-[640px] aspect-[4/3] shadow-[0_30px_60px_-40px_rgba(28,25,21,0.55)]">
+              <div className="w-full max-w-[640px] aspect-[3/4] shadow-[0_30px_60px_-40px_rgba(28,25,21,0.55)]">
                 <div className="relative w-full h-full">
+                  {/* Room photos vary in their natural aspect ratio shot to shot — contain
+                      instead of cover so a portrait shot never gets cropped to a fixed box. */}
                   <Image
                     src={roomImage.url}
                     alt={roomImage.alt || `${product.title} — in room`}
                     fill
                     sizes="640px"
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               </div>
             )}
             {viewIdx === 3 && !roomImage?.url && (
-              <div className="w-full max-w-[640px] aspect-[4/3] relative bg-image-placeholder border border-hairline flex items-center justify-center text-muted text-sm">
+              <div className="w-full max-w-[640px] aspect-[3/4] relative bg-image-placeholder border border-hairline flex items-center justify-center text-muted text-sm">
                 Room view coming soon
               </div>
             )}

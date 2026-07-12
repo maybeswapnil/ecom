@@ -169,10 +169,10 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
               </div>
             )}
             {viewIdx === 3 && roomImage?.url && (
-              <div className="w-full max-w-[640px] aspect-[3/4] shadow-[0_30px_60px_-40px_rgba(28,25,21,0.55)]">
+              // No drop shadow here: object-contain means the image doesn't fill this
+              // box edge to edge, so a shadow renders as a floating rectangle behind it.
+              <div className="w-full max-w-[640px] aspect-[3/4]">
                 <div className="relative w-full h-full">
-                  {/* Room photos vary in their natural aspect ratio shot to shot — contain
-                      instead of cover so a portrait shot never gets cropped to a fixed box. */}
                   <Image
                     src={roomImage.url}
                     alt={roomImage.alt || `${product.title} — in room`}

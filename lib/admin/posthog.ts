@@ -2,6 +2,11 @@ const POSTHOG_API_HOST = process.env.POSTHOG_API_HOST ?? "https://us.posthog.com
 const POSTHOG_PROJECT_ID = process.env.POSTHOG_PROJECT_ID;
 const POSTHOG_PERSONAL_API_KEY = process.env.POSTHOG_PERSONAL_API_KEY;
 
+// The app UI (us.posthog.com) is a different host from the query API base
+// (POSTHOG_API_HOST may be a self-hosted/regional API host) — always link to
+// the public app for "open in PostHog", not whatever POSTHOG_API_HOST is.
+const POSTHOG_APP_HOST = "https://us.posthog.com";
+
 export interface TrafficOverview {
   configured: boolean;
   pageviews7d: number;
@@ -9,6 +14,7 @@ export interface TrafficOverview {
   pageviews30d: number;
   uniqueVisitors30d: number;
   topPages: { path: string; views: number }[];
+  dashboardUrl: string | null;
 }
 
 const EMPTY_OVERVIEW: TrafficOverview = {
@@ -18,6 +24,7 @@ const EMPTY_OVERVIEW: TrafficOverview = {
   pageviews30d: 0,
   uniqueVisitors30d: 0,
   topPages: [],
+  dashboardUrl: null,
 };
 
 async function runHogQL<T = unknown[]>(query: string): Promise<T[]> {
@@ -74,6 +81,7 @@ export async function getTrafficOverview(): Promise<TrafficOverview> {
       pageviews30d,
       uniqueVisitors30d,
       topPages: topPages.map(([path, views]) => ({ path: path ?? "(unknown)", views })),
+      dashboardUrl: `${POSTHOG_APP_HOST}/project/${POSTHOG_PROJECT_ID}/home`,
     };
   } catch {
     return EMPTY_OVERVIEW;

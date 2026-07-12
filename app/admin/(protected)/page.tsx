@@ -37,7 +37,19 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="border border-hairline bg-surface rounded-xl p-5">
-        <div className="text-sm font-semibold mb-4">Traffic (PostHog)</div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm font-semibold">Traffic (PostHog)</div>
+          {traffic.dashboardUrl && (
+            <a
+              href={traffic.dashboardUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-muted hover:text-ink underline"
+            >
+              Full analysis in PostHog →
+            </a>
+          )}
+        </div>
         {!traffic.configured ? (
           <div className="text-sm text-muted">
             PostHog read access isn&apos;t configured — set POSTHOG_PERSONAL_API_KEY and

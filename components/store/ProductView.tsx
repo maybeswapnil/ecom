@@ -169,16 +169,19 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
               </div>
             )}
             {viewIdx === 3 && roomImage?.url && (
-              // No drop shadow here: object-contain means the image doesn't fill this
-              // box edge to edge, so a shadow renders as a floating rectangle behind it.
-              <div className="w-full max-w-[640px] aspect-[3/4]">
+              // object-cover + object-bottom: the image fills this box edge to edge, so
+              // the gap around it is the stage's own uniform padding on all four sides
+              // (object-contain letterboxed non-3/4 images unevenly). Overflow is cropped
+              // from the top — room shots keep the framed print in the lower half, so the
+              // excess wall/ceiling is what goes.
+              <div className="w-full max-w-[640px] aspect-[3/4] shadow-[0_30px_60px_-40px_rgba(28,25,21,0.55)]">
                 <div className="relative w-full h-full">
                   <Image
                     src={roomImage.url}
                     alt={roomImage.alt || `${product.title} — in room`}
                     fill
                     sizes="640px"
-                    className="object-contain"
+                    className="object-cover object-bottom"
                   />
                 </div>
               </div>

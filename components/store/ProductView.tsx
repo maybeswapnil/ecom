@@ -82,7 +82,9 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
   const detailImage = product.images.find((img) => img.role === "detail") ?? framedImage;
   const roomImage = product.images.find((img) => img.role === "room");
 
-  const viewImages = [framedImage, printImage, detailImage, roomImage];
+  // "In room" only exists as a tab when a room photo actually exists — no placeholder tab.
+  const viewImages = [framedImage, printImage, detailImage, ...(roomImage ? [roomImage] : [])];
+  const viewLabels = VIEW_LABELS.slice(0, viewImages.length);
 
   const finish = FINISH_SWATCH[finishName] ?? FINISH_SWATCH.Black;
   const dims = SIZE_DIMENSIONS[sizeLabel] ?? SIZE_DIMENSIONS.A4;
@@ -186,14 +188,9 @@ export function ProductView({ product, variants, place, year, ratio }: Props) {
                 </div>
               </div>
             )}
-            {viewIdx === 3 && !roomImage?.url && (
-              <div className="w-full max-w-[640px] aspect-[3/4] relative bg-image-placeholder border border-hairline flex items-center justify-center text-muted text-sm">
-                Room view coming soon
-              </div>
-            )}
           </div>
           <div className="flex gap-3.5 mt-4.5 overflow-x-auto [scroll-snap-type:x_mandatory] p-0.5">
-            {VIEW_LABELS.map((label, i) => (
+            {viewLabels.map((label, i) => (
               <button
                 key={label}
                 onClick={() => setViewIdx(i)}

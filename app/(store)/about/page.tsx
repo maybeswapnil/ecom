@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
-const ABOUT_DESCRIPTION = `The story behind ${BRAND_NAME} — a decade of photographs from across India.`;
+const ABOUT_DESCRIPTION = `The story behind ${BRAND_NAME} — a decade of photographs from across India and Europe.`;
 
 export const metadata: Metadata = {
   title: "About",
@@ -52,10 +52,10 @@ export default function AboutPage() {
             laptop. It looked like it belonged there.
           </p>
           <p className="text-base leading-[1.75] text-muted-soft m-0 mb-5.5">
-            So this is the collection: photographs I&rsquo;ve made across India over the last
-            decade, printed and framed the way I wish someone had framed them for me. Cotton rag
-            paper with pigment inks. Solid wood frames. Acrylic glazing so nothing shatters in
-            transit. Every piece signed, numbered, and shipped from Bengaluru.
+            So this is the collection: photographs I&rsquo;ve made across India and Europe over
+            the last decade, printed and framed the way I wish someone had framed them for me.
+            Cotton rag paper with pigment inks. Solid wood frames. Acrylic glazing so nothing
+            shatters in transit. Every piece signed, numbered, and shipped from Bengaluru.
           </p>
           <p className="text-base leading-[1.75] text-muted-soft m-0 mb-7">
             If you have a question about a print, a wall, or a size — write to me at{" "}

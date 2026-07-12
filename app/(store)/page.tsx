@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/store/ProductCard";
 import { BRAND_NAME, SITE_URL, SOCIAL_LINKS } from "@/lib/config";
 
 const HOME_DESCRIPTION =
-  "A small collection of limited-edition framed photographic prints from a decade spent wandering India. Archival paper, hand-framed, shipped ready to hang.";
+  "A small collection of limited-edition framed photographic prints from a decade spent wandering India and Europe. Archival paper, hand-framed, shipped ready to hang.";
 
 export const metadata: Metadata = {
   title: `${BRAND_NAME} — Framed Photographic Prints`,
@@ -64,8 +64,8 @@ export default async function HomePage() {
             framed with <span className="font-semibold">care.</span>
           </h1>
           <p className="text-[17px] leading-[1.65] text-muted-soft max-w-[44ch] mb-9.5">
-            A small collection of limited-edition prints from a decade spent wandering India — each
-            printed on archival paper, framed by hand, and shipped ready to hang.
+            A small collection of limited-edition prints from a decade spent wandering India and
+            Europe — each printed on archival paper, framed by hand, and shipped ready to hang.
           </p>
           <div className="flex flex-wrap gap-3.5 items-center">
             <Link
@@ -165,7 +165,7 @@ export default async function HomePage() {
               laptop. It looked like it belonged there.&rdquo;
             </p>
             <p className="text-[15.5px] leading-[1.7] text-muted-soft mb-8.5 max-w-[52ch]">
-              {`${BRAND_NAME} began with a single photograph on a friend’s wall — and became a decade of images from across India, printed and framed the way they deserve.`}
+              {`${BRAND_NAME} began with a single photograph on a friend’s wall — and became a decade of images from across India and Europe, printed and framed the way they deserve.`}
             </p>
             <Link
               href="/about"

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: `%s | ${BRAND_NAME}`,
   },
   description:
-    "Limited-edition photographic prints from across India, printed on archival paper and framed by hand.",
+    "Limited-edition photographic prints from across India and Europe, printed on archival paper and framed by hand.",
   openGraph: {
     siteName: BRAND_NAME,
     type: "website",

@@ -21,7 +21,9 @@ export function Header({ onCartOpen }: { onCartOpen: () => void }) {
   return (
     <header className="sticky top-0 z-40 bg-paper/92 backdrop-blur-md border-b border-hairline">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-7 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-5">
-        <div className="flex items-center gap-4 sm:gap-9 min-w-0">
+        {/* items-baseline: the 26px serif wordmark and 14px nav links must share a text baseline —
+            items-center aligns their line boxes instead, leaving the links floating visibly high. */}
+        <div className="flex items-baseline gap-4 sm:gap-9 min-w-0">
           <Link href="/" className="bg-transparent border-none cursor-pointer p-0 shrink-0 flex items-center">
             <span className="font-display text-lg sm:text-[26px] font-medium tracking-[0.01em] text-ink whitespace-nowrap leading-none">
               {BRAND_NAME}

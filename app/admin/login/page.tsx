@@ -54,6 +54,9 @@ export default function AdminLoginPage() {
     const { data: enrolled, error: enrollError } = await supabase.auth.mfa.enroll({
       factorType: "totp",
       friendlyName: "Admin authenticator",
+      // Shown as the account label in authenticator apps — without this,
+      // Supabase falls back to the project's Site URL (e.g. "localhost:3000").
+      issuer: BRAND_NAME,
     });
     if (enrollError || !enrolled) {
       setError("Could not start authenticator setup — please try again.");

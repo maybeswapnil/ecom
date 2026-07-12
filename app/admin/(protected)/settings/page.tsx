@@ -1,5 +1,6 @@
 import { getCompanySettings } from "@/lib/company-settings";
 import { CompanySettingsForm } from "@/components/admin/CompanySettingsForm";
+import { TotpResetControl } from "@/components/admin/TotpResetControl";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function AdminSettingsPage() {
         </p>
         <CompanySettingsForm settings={settings} />
       </div>
+      <TotpResetControl />
     </div>
   );
 }

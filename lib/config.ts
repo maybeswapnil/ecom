@@ -18,6 +18,9 @@ export const TRACKING_SWEEP_HOURS = 6;
 export const BRAND_NAME = "Prints Company";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+/** Bundled fallback for the home-page hero when no image is set in admin settings. */
+export const DEFAULT_HERO_IMAGE = "/images/hero-framed-print.jpg";
+
 export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/hellochemo/",
   pexels: "https://www.pexels.com/@hellochemo/",

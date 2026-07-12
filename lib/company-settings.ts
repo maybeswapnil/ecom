@@ -28,6 +28,20 @@ export function companySettingsAddressLines(settings: CompanySettings): string[]
   return [settings.addressLine1, settings.addressLine2, cityLine].filter(Boolean);
 }
 
+/** Home-page hero image URL — empty string means "use the bundled default".
+ *  Kept separate from getCompanySettings so a failure here (e.g. migration not
+ *  yet applied) can't degrade the invoice/email company details. */
+export async function getHeroImageUrl(): Promise<string> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("company_settings")
+    .select("hero_image_url")
+    .eq("id", 1)
+    .maybeSingle();
+
+  return data?.hero_image_url ?? "";
+}
+
 export async function getCompanySettings(): Promise<CompanySettings> {
   const supabase = createAdminClient();
   const { data } = await supabase

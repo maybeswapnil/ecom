@@ -2,8 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getFeaturedProducts } from "@/lib/catalog";
+import { getHeroImageUrl } from "@/lib/company-settings";
 import { ProductCard } from "@/components/store/ProductCard";
-import { BRAND_NAME, SITE_URL, SOCIAL_LINKS } from "@/lib/config";
+import { BRAND_NAME, DEFAULT_HERO_IMAGE, SITE_URL, SOCIAL_LINKS } from "@/lib/config";
 
 // ISR safety net: serve the prerendered page from cache and regenerate at most
 // every 5 minutes. Admin edits revalidate the path immediately, so this only
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const featured = await getFeaturedProducts();
+  const [featured, heroImageUrl] = await Promise.all([getFeaturedProducts(), getHeroImageUrl()]);
 
   const jsonLd = [
     {
@@ -90,7 +91,7 @@ export default async function HomePage() {
         <div className="flex-[1_1_44%] w-full max-w-[440px]">
           <div className="relative w-full aspect-[4/5] bg-image-placeholder shadow-[0_30px_60px_-38px_rgba(28,25,21,0.5)]">
             <Image
-              src="/images/hero-framed-print.jpg"
+              src={heroImageUrl || DEFAULT_HERO_IMAGE}
               alt="A framed print of a mountain range, held up in a sunlit room"
               fill
               priority

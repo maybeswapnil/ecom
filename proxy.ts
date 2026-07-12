@@ -77,6 +77,14 @@ async function gateAdmin(req: NextRequest, res: NextResponse): Promise<NextRespo
     return NextResponse.redirect(loginUrl);
   }
 
+  // Session must also be MFA-verified (AAL2) — a password-only session may not
+  // browse /admin. Derived from JWT claims, so no extra network round trip.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") {
+    const loginUrl = new URL("/admin/login", req.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
   return res;
 }
 

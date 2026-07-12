@@ -25,5 +25,14 @@ export async function requireAdmin(): Promise<{ email: string }> {
     redirect("/admin/login");
   }
 
+  // Admin sessions must be MFA-verified (AAL2). A password-only session is
+  // AAL1 and gets bounced back to the login page, which walks the user through
+  // TOTP enrollment (first time) or the 6-digit challenge. Enforcing here —
+  // not just in the proxy — covers every server action as well.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") {
+    redirect("/admin/login");
+  }
+
   return { email: user.email! };
 }

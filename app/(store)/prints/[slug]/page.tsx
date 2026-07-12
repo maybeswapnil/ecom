@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getProductBySlug, distinctSizes, sortedVariants } from "@/lib/catalog";
+import { getApprovedReviews, aggregateRating } from "@/lib/reviews";
 import { ProductView } from "@/components/store/ProductView";
+import { ProductReviews } from "@/components/store/ProductReviews";
 import { SITE_URL } from "@/lib/config";
 
 export async function generateMetadata({
@@ -47,6 +49,9 @@ export default async function ProductPage({
   const year = product.tags.find((t) => t.startsWith("year:"))?.slice(5) ?? "";
   const ratio = product.tags.includes("portrait") ? "4/5" : "3/2";
 
+  const reviews = await getApprovedReviews(product.id);
+  const rating = aggregateRating(reviews);
+
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -55,6 +60,21 @@ export default async function ProductPage({
       description: product.description,
       image: product.images.map((img) => img.url),
       sku: variants[0]?.sku,
+      ...(rating && {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: rating.average.toFixed(1),
+          reviewCount: rating.count,
+        },
+      }),
+      ...(reviews.length > 0 && {
+        review: reviews.map((r) => ({
+          "@type": "Review",
+          author: { "@type": "Person", name: r.reviewer_name },
+          reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
+          ...(r.body && { reviewBody: r.body }),
+        })),
+      }),
       offers: variants.map((v) => ({
         "@type": "Offer",
         sku: v.sku,
@@ -88,6 +108,7 @@ export default async function ProductPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <ProductView product={product} variants={variants} place={place} year={year} ratio={ratio} />
+      <ProductReviews reviews={reviews} average={rating?.average ?? null} />
     </>
   );
 }

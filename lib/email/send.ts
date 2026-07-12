@@ -11,6 +11,7 @@ import OrderCanceledEmail from "@/emails/OrderCanceled";
 import { OrderInvoiceDocument, type InvoiceItem } from "@/lib/pdf/OrderInvoice";
 import { getCompanySettings, companySettingsAddressLines } from "@/lib/company-settings";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
+import { receiptToken } from "@/lib/order-token";
 
 type SendResult = { sent: true } | { sent: false; reason: string };
 
@@ -201,6 +202,7 @@ export async function sendDeliveredEmail(params: {
     react: DeliveredEmail({
       orderNumber: params.orderNumber,
       receiptUrl: `${SITE_URL}/order/${params.orderNumber}`,
+      reviewUrl: `${SITE_URL}/order/${params.orderNumber}/review?t=${receiptToken(params.orderNumber)}`,
       companyName: settings.companyName,
     }),
   });

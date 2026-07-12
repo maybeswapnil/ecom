@@ -45,3 +45,14 @@ export type ProductVariant = {
 export type ProductWithVariants = Product & {
   product_variants: ProductVariant[];
 };
+
+export type ProductReview = {
+  id: string;
+  product_id: string;
+  order_id: string;
+  rating: number;
+  body: string | null;
+  reviewer_name: string;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+};

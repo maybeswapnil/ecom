@@ -88,6 +88,16 @@ export const contactReplySchema = z.object({
   reply: z.string().min(1, "Reply cannot be empty").max(4000, "Reply is too long"),
 });
 
+export const reviewSubmitSchema = z.object({
+  productId: z.string().uuid("Invalid product"),
+  rating: z.number().int().min(1, "Pick a star rating").max(5, "Pick a star rating"),
+  body: z.string().max(2000, "Review is too long").optional().default(""),
+  reviewerName: z.string().min(1, "Name is required").max(120, "Name is too long"),
+});
+
+export type ReviewSubmitValues = z.infer<typeof reviewSubmitSchema>;
+export type ReviewSubmitErrors = Partial<Record<keyof ReviewSubmitValues, string>>;
+
 export const companySettingsSchema = z.object({
   companyName: z.string().min(1, "Company name is required").max(200, "Too long"),
   addressLine1: z.string().max(200, "Too long").optional().default(""),
@@ -101,3 +111,22 @@ export const companySettingsSchema = z.object({
 
 export type CompanySettingsValues = z.infer<typeof companySettingsSchema>;
 export type CompanySettingsErrors = Partial<Record<keyof CompanySettingsValues, string>>;
+
+// Admin form works in whole rupees; the action converts to paise for storage.
+export const shippingOfferSchema = z.object({
+  active: z.boolean(),
+  name: z.string().min(1, "Name is required").max(120, "Too long"),
+  thresholdRupees: z.coerce
+    .number({ message: "Enter a threshold amount" })
+    .int("Whole rupees only")
+    .min(500, "Threshold must be at least ₹500")
+    .max(1000000, "Threshold cannot exceed ₹10,00,000"),
+  flatRateRupees: z.coerce
+    .number({ message: "Enter a shipping rate" })
+    .int("Whole rupees only")
+    .min(0, "Cannot be negative")
+    .max(10000, "Rate cannot exceed ₹10,000"),
+});
+
+export type ShippingOfferValues = z.infer<typeof shippingOfferSchema>;
+export type ShippingOfferErrors = Partial<Record<keyof ShippingOfferValues, string>>;

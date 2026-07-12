@@ -1,4 +1,4 @@
-import { Preview, Section, Text } from "@react-email/components";
+import { Link, Preview, Section, Text } from "@react-email/components";
 import { BRAND_NAME } from "@/lib/config";
 import {
   EmailShell,
@@ -14,12 +14,14 @@ import {
 type Props = {
   orderNumber: string;
   receiptUrl: string;
+  reviewUrl: string;
   companyName?: string;
 };
 
 export default function DeliveredEmail({
   orderNumber,
   receiptUrl,
+  reviewUrl,
   companyName = BRAND_NAME,
 }: Props) {
   return (
@@ -47,10 +49,14 @@ export default function DeliveredEmail({
       </EmailPanel>
 
       <Section style={{ padding: "26px 44px 34px", textAlign: "center" }}>
-        <EmailCta href={receiptUrl}>View your order</EmailCta>
+        <EmailCta href={reviewUrl}>Rate your prints</EmailCta>
         <Text style={{ fontSize: "12.5px", lineHeight: "1.6", color: colors.faint, margin: "18px 0 0" }}>
-          We love seeing where they end up. And if it isn&rsquo;t quite right, our returns policy
-          has you covered — just reply to this email.
+          Or{" "}
+          <Link href={receiptUrl} style={{ color: colors.inkSoft }}>
+            view your order
+          </Link>
+          . And if it isn&rsquo;t quite right, our returns policy has you covered — just reply to
+          this email.
         </Text>
       </Section>
 

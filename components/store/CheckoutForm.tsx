@@ -8,6 +8,7 @@ import { useCartStore, cartSubtotalPaise } from "@/lib/cart-store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { formatPaise } from "@/lib/money";
 import { BRAND_NAME, FREE_SHIP_THRESHOLD_PAISE, SHIPPING_FLAT_PAISE } from "@/lib/config";
+import { useShippingOffer } from "@/lib/use-shipping-offer";
 import {
   checkoutFormSchema,
   INDIAN_STATE_LIST,
@@ -44,9 +45,15 @@ export function CheckoutForm() {
     pincode: "",
   });
 
+  const shippingOffer = useShippingOffer();
+
   const subtotal = hydrated ? cartSubtotalPaise(lines) : 0;
-  const freeReached = subtotal >= FREE_SHIP_THRESHOLD_PAISE && subtotal > 0;
-  const shippingCost = subtotal === 0 || freeReached ? 0 : SHIPPING_FLAT_PAISE;
+  // Compiled defaults until the live offer loads — the same values the server fails closed to.
+  // A stale quote can't mischarge: /api/checkout recomputes and 409s on expected_total mismatch.
+  const threshold = shippingOffer ? shippingOffer.thresholdPaise : FREE_SHIP_THRESHOLD_PAISE;
+  const flatPaise = shippingOffer ? shippingOffer.flatPaise : SHIPPING_FLAT_PAISE;
+  const freeReached = threshold !== null && subtotal >= threshold && subtotal > 0;
+  const shippingCost = subtotal === 0 || freeReached ? 0 : flatPaise;
   const total = subtotal + shippingCost;
 
   const [idempotencyKey] = useState(generateIdempotencyKey);
@@ -275,7 +282,7 @@ export function CheckoutForm() {
                   </span>
                 </span>
                 <span className="font-display text-lg">
-                  {freeReached ? "Free" : formatPaise(SHIPPING_FLAT_PAISE)}
+                  {freeReached ? "Free" : formatPaise(flatPaise)}
                 </span>
               </div>
             </div>

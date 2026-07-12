@@ -1,7 +1,11 @@
 // Config constants — SPEC.md §12
-export const SHIPPING_FLAT_PAISE = 14900; // ₹149, matches mockup shipOptions
+// Shipping values are FALLBACK DEFAULTS only since 014_offers.sql: the live values come from
+// company_settings.shipping_flat_paise and the active 'free_shipping' row in offers
+// (lib/offers.ts). Used when the DB read fails (fail-closed: charge shipping) and as the
+// client's optimistic initial state while /api/offers/shipping loads.
+export const SHIPPING_FLAT_PAISE = 14900; // ₹149
 export const EXPRESS_SHIPPING_PAISE = 34900; // ₹349
-export const FREE_SHIP_THRESHOLD_PAISE = 750000; // ₹7,500, matches mockup FREE constant
+export const FREE_SHIP_THRESHOLD_PAISE = 750000; // ₹7,500
 export const MAX_QTY_PER_LINE = 10;
 export const MAX_CART_LINES = 20;
 export const PENDING_ORDER_TTL_HOURS = 24;

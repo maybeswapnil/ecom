@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useCartStore, cartSubtotalPaise } from "@/lib/cart-store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { formatPaise } from "@/lib/money";
-import { FREE_SHIP_THRESHOLD_PAISE } from "@/lib/config";
+import { useShippingOffer } from "@/lib/use-shipping-offer";
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const lines = useCartStore((s) => s.lines);
@@ -14,6 +14,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const incQty = useCartStore((s) => s.incQty);
   const applyValidation = useCartStore((s) => s.applyValidation);
   const hydrated = useHydrated();
+  const shippingOffer = useShippingOffer();
 
   useEffect(() => {
     if (!open || lines.length === 0) return;
@@ -34,14 +35,16 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   if (!open) return null;
 
   const subtotal = hydrated ? cartSubtotalPaise(lines) : 0;
-  const remaining = Math.max(0, FREE_SHIP_THRESHOLD_PAISE - subtotal);
-  const freeReached = subtotal >= FREE_SHIP_THRESHOLD_PAISE && subtotal > 0;
+  // Hidden while the offer is loading (undefined) or when no free-shipping offer is running (null).
+  const threshold = shippingOffer?.thresholdPaise ?? null;
+  const remaining = threshold === null ? 0 : Math.max(0, threshold - subtotal);
+  const freeReached = threshold !== null && subtotal >= threshold && subtotal > 0;
   const freeShipMsg = freeReached
     ? "Free insured shipping unlocked."
     : subtotal === 0
-      ? `Free insured shipping over ${formatPaise(FREE_SHIP_THRESHOLD_PAISE)}.`
+      ? `Free insured shipping over ${formatPaise(threshold ?? 0)}.`
       : `Add ${formatPaise(remaining)} more for free shipping.`;
-  const barWidth = Math.min(100, (subtotal / FREE_SHIP_THRESHOLD_PAISE) * 100);
+  const barWidth = threshold === null ? 0 : Math.min(100, (subtotal / threshold) * 100);
 
   return (
     <div className="fixed inset-0 z-[60]">
@@ -61,15 +64,17 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           </button>
         </div>
 
-        <div className="px-7 py-4.5 border-b border-hairline">
-          <div className="text-[12.5px] text-muted-soft mb-2.5">{freeShipMsg}</div>
-          <div className="h-[3px] bg-hairline rounded-full overflow-hidden">
-            <div
-              className="h-full bg-ink transition-[width] duration-300 ease-out"
-              style={{ width: `${barWidth}%` }}
-            />
+        {threshold !== null && (
+          <div className="px-7 py-4.5 border-b border-hairline">
+            <div className="text-[12.5px] text-muted-soft mb-2.5">{freeShipMsg}</div>
+            <div className="h-[3px] bg-hairline rounded-full overflow-hidden">
+              <div
+                className="h-full bg-ink transition-[width] duration-300 ease-out"
+                style={{ width: `${barWidth}%` }}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex-1 overflow-y-auto px-7 py-1.5">
           {hydrated && lines.length === 0 && (

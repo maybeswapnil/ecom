@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cartValidateSchema } from "@/lib/validation";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
-import { FREE_SHIP_THRESHOLD_PAISE, SHIPPING_FLAT_PAISE } from "@/lib/config";
+import { getShippingQuote } from "@/lib/offers";
 
 export const runtime = "nodejs";
 
@@ -88,14 +88,19 @@ export async function POST(req: Request) {
     };
   });
 
-  const shippingPaise = subtotalPaise >= FREE_SHIP_THRESHOLD_PAISE ? 0 : SHIPPING_FLAT_PAISE;
-  const freeShipGapPaise = Math.max(0, FREE_SHIP_THRESHOLD_PAISE - subtotalPaise);
+  const quote = await getShippingQuote(subtotalPaise);
+  const freeShipGapPaise =
+    quote.freeShipThresholdPaise === null
+      ? null
+      : Math.max(0, quote.freeShipThresholdPaise - subtotalPaise);
 
   return NextResponse.json({
     items,
     subtotal_paise: subtotalPaise,
-    shipping_paise: shippingPaise,
+    shipping_paise: quote.shippingPaise,
+    // null when no free-shipping offer is running — clients hide the threshold UI entirely.
+    free_ship_threshold_paise: quote.freeShipThresholdPaise,
     free_shipping_gap_paise: freeShipGapPaise,
-    total_paise: subtotalPaise + shippingPaise,
+    total_paise: subtotalPaise + quote.shippingPaise,
   });
 }

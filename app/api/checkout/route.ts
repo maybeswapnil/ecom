@@ -4,7 +4,7 @@ import { checkoutSchema } from "@/lib/validation";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { createRazorpayOrder, RazorpayNotConfiguredError } from "@/lib/razorpay";
 import { receiptToken } from "@/lib/order-token";
-import { FREE_SHIP_THRESHOLD_PAISE, SHIPPING_FLAT_PAISE } from "@/lib/config";
+import { getShippingQuote } from "@/lib/offers";
 
 export const runtime = "nodejs";
 
@@ -100,7 +100,8 @@ export async function POST(req: Request) {
     const v = variantBySku.get(item.sku)!;
     return sum + v.price_paise * item.qty;
   }, 0);
-  const shippingPaise = subtotalPaise >= FREE_SHIP_THRESHOLD_PAISE ? 0 : SHIPPING_FLAT_PAISE;
+  const quote = await getShippingQuote(subtotalPaise);
+  const shippingPaise = quote.shippingPaise;
   const totalPaise = subtotalPaise + shippingPaise;
 
   if (totalPaise !== input.expected_total_paise) {
@@ -129,6 +130,7 @@ export async function POST(req: Request) {
       shipping_paise: shippingPaise,
       total_paise: totalPaise,
       purchase_event_id: purchaseEventId,
+      applied_offer_id: quote.appliedOfferId,
       idempotency_key: input.idempotency_key,
       attribution: { ph_distinct_id: input.ph_distinct_id ?? null },
     })

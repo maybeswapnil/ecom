@@ -29,6 +29,23 @@ export default async function AdminOrderDetailPage({
       supabase.from("refunds").select("*").eq("order_id", id),
     ]);
 
+  // Free-shipping refund-abuse guardrail: this order qualified for free shipping, but refunds
+  // have pulled it back below the threshold it qualified with.
+  let appliedOfferThresholdPaise: number | null = null;
+  if (order.applied_offer_id) {
+    const { data: appliedOffer } = await supabase
+      .from("offers")
+      .select("min_subtotal_paise")
+      .eq("id", order.applied_offer_id)
+      .maybeSingle();
+    appliedOfferThresholdPaise = appliedOffer?.min_subtotal_paise ?? null;
+  }
+  const refundedPaise = (refunds ?? []).reduce((sum, r) => sum + r.amount_paise, 0);
+  const freeShipBelowThreshold =
+    appliedOfferThresholdPaise !== null &&
+    refundedPaise > 0 &&
+    order.subtotal_paise - refundedPaise < appliedOfferThresholdPaise;
+
   const address = order.shipping_address as {
     line1: string;
     line2?: string;
@@ -114,6 +131,13 @@ export default async function AdminOrderDetailPage({
                   {r.restocked ? " (restocked)" : ""}
                 </div>
               ))}
+              {freeShipBelowThreshold && (
+                <div className="mt-2 px-3 py-2 rounded-md bg-amber-50 border border-amber-300 text-amber-900 text-[12.5px]">
+                  This order shipped free (threshold {formatPaise(appliedOfferThresholdPaise!)}),
+                  but refunds have brought it below that threshold. Consider deducting the shipping
+                  fee from any further refund.
+                </div>
+              )}
             </div>
           </div>
 

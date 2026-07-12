@@ -6,7 +6,7 @@ import { useEffect, useState, startTransition } from "react";
 import { useCartStore, cartSubtotalPaise } from "@/lib/cart-store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { formatPaise } from "@/lib/money";
-import { FREE_SHIP_THRESHOLD_PAISE } from "@/lib/config";
+import { useShippingOffer } from "@/lib/use-shipping-offer";
 
 export function CartPageContent() {
   const lines = useCartStore((s) => s.lines);
@@ -14,6 +14,7 @@ export function CartPageContent() {
   const incQty = useCartStore((s) => s.incQty);
   const applyValidation = useCartStore((s) => s.applyValidation);
   const hydrated = useHydrated();
+  const shippingOffer = useShippingOffer();
   const [validating, setValidating] = useState(false);
 
   useEffect(() => {
@@ -62,24 +63,28 @@ export function CartPageContent() {
 
   const subtotal = cartSubtotalPaise(lines);
   const hasBlockingLine = lines.some((l) => l.state === "out_of_stock" || l.state === "unavailable");
-  const remaining = Math.max(0, FREE_SHIP_THRESHOLD_PAISE - subtotal);
-  const freeReached = subtotal >= FREE_SHIP_THRESHOLD_PAISE;
+  // Hidden while the offer is loading (undefined) or when no free-shipping offer is running (null).
+  const threshold = shippingOffer?.thresholdPaise ?? null;
+  const remaining = threshold === null ? 0 : Math.max(0, threshold - subtotal);
+  const freeReached = threshold !== null && subtotal >= threshold;
 
   return (
     <div>
-      <div className="mb-8">
-        <div className="text-[12.5px] text-muted-soft mb-2.5">
-          {freeReached
-            ? "Free insured shipping unlocked."
-            : `Add ${formatPaise(remaining)} more for free shipping.`}
+      {threshold !== null && (
+        <div className="mb-8">
+          <div className="text-[12.5px] text-muted-soft mb-2.5">
+            {freeReached
+              ? "Free insured shipping unlocked."
+              : `Add ${formatPaise(remaining)} more for free shipping.`}
+          </div>
+          <div className="h-[3px] bg-hairline rounded-full overflow-hidden">
+            <div
+              className="h-full bg-ink transition-[width] duration-300 ease-out"
+              style={{ width: `${Math.min(100, (subtotal / threshold) * 100)}%` }}
+            />
+          </div>
         </div>
-        <div className="h-[3px] bg-hairline rounded-full overflow-hidden">
-          <div
-            className="h-full bg-ink transition-[width] duration-300 ease-out"
-            style={{ width: `${Math.min(100, (subtotal / FREE_SHIP_THRESHOLD_PAISE) * 100)}%` }}
-          />
-        </div>
-      </div>
+      )}
 
       <div className="flex flex-col gap-0">
         {lines.map((l) => (

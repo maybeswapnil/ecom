@@ -34,7 +34,7 @@ export default function AboutPage() {
           <div className="md:sticky md:top-[104px]">
             <div className="relative w-full aspect-[4/5]">
               <Image
-                src="/images/about-portrait.png"
+                src="/images/about-portrait.jpg"
                 alt="Holding a freshly printed photograph of a Paris street corner"
                 fill
                 sizes="320px"

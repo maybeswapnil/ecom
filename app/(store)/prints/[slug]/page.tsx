@@ -1,10 +1,20 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getProductBySlug, distinctSizes, sortedVariants } from "@/lib/catalog";
+import { getProductBySlug, getLiveSlugs, distinctSizes, sortedVariants } from "@/lib/catalog";
 import { getApprovedReviews, aggregateRating } from "@/lib/reviews";
 import { ProductView } from "@/components/store/ProductView";
 import { ProductReviews } from "@/components/store/ProductReviews";
 import { SITE_URL } from "@/lib/config";
+
+// ISR safety net — admin edits revalidate this path immediately; see home page.
+export const revalidate = 300;
+
+// Prerender all live products at build; new slugs render on first request and
+// are then cached (dynamicParams defaults to true).
+export async function generateStaticParams() {
+  const slugs = await getLiveSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -30,7 +40,12 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: heroImage ? [heroImage.url] : [],
+      // Route the OG image through the Next image optimizer — the stored
+      // original can be multi-MB, which link-preview crawlers fetch in full.
+      // Resolved absolute against metadataBase; w=1200 is a default deviceSize.
+      images: heroImage
+        ? [`/_next/image?url=${encodeURIComponent(heroImage.url)}&w=1200&q=75`]
+        : [],
     },
   };
 }

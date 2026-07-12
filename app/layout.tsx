@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { displaySerif, bodySans } from "./fonts";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
+import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${displaySerif.variable} ${bodySans.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-paper text-ink font-body overflow-x-hidden">
-        {children}
+        <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>
   );

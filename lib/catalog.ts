@@ -1,8 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { ProductWithVariants } from "@/lib/types";
 
 export async function getLiveProducts(): Promise<ProductWithVariants[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("products")
     .select("*, product_variants(*)")
@@ -22,7 +23,7 @@ const FEATURED_FALLBACK_MIN = 3;
  *  empty. Once at least one product is featured, we show exactly that
  *  selection — no silent padding to a fixed count. */
 export async function getFeaturedProducts(): Promise<ProductWithVariants[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: featured, error: featuredError } = await supabase
     .from("products")
@@ -49,17 +50,30 @@ export async function getFeaturedProducts(): Promise<ProductWithVariants[]> {
   return (fallback ?? []) as ProductWithVariants[];
 }
 
-export async function getProductBySlug(slug: string): Promise<ProductWithVariants | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, product_variants(*)")
-    .eq("slug", slug)
-    .eq("status", "live")
-    .maybeSingle();
+// cache(): generateMetadata and the page body both call this for the same slug
+// within one request — dedupe to a single Supabase round trip.
+export const getProductBySlug = cache(
+  async (slug: string): Promise<ProductWithVariants | null> => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("slug", slug)
+      .eq("status", "live")
+      .maybeSingle();
 
-  if (error) throw new Error(`Failed to load product ${slug}: ${error.message}`);
-  return data as ProductWithVariants | null;
+    if (error) throw new Error(`Failed to load product ${slug}: ${error.message}`);
+    return data as ProductWithVariants | null;
+  }
+);
+
+/** Slugs of all live products — used to prerender product pages at build time. */
+export async function getLiveSlugs(): Promise<string[]> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase.from("products").select("slug").eq("status", "live");
+
+  if (error) throw new Error(`Failed to load product slugs: ${error.message}`);
+  return (data ?? []).map((row) => row.slug as string);
 }
 
 const SIZE_ORDER = ["A4", "A3", "A2", "A1", "30x40", "40x50", "50x70"];

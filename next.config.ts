@@ -31,6 +31,11 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // PostHog's ingestion endpoints are POSTed to with a trailing slash (e.g. /i/v0/e/).
+  // Next.js's default trailing-slash redirect (308) breaks that POST through the /ingest
+  // rewrite below — sendBeacon/fetch can't transparently replay a POST body across a
+  // redirect, so events are silently dropped. This opts out of that redirect entirely.
+  skipTrailingSlashRedirect: true,
   turbopack: {
     root: __dirname,
   },

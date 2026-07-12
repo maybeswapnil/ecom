@@ -12,6 +12,46 @@ import { PRODUCT_IMAGE_ROLE_LABELS } from "@/lib/types";
 // checked client-side to avoid ever sending a request Vercel will 413 anyway.
 const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
 
+// Stored images are fetched in full by the next/image optimizer on every cache
+// miss, so multi-MB camera originals directly slow the storefront. Downscale
+// and re-encode in the browser before upload; 2000px covers the largest
+// rendered size (~1280px hero on retina) with headroom.
+const MAX_IMAGE_EDGE_PX = 2000;
+const RECOMPRESS_THRESHOLD_BYTES = 500 * 1024;
+const WEBP_QUALITY = 0.85;
+
+async function resizeForUpload(file: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, MAX_IMAGE_EDGE_PX / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size <= RECOMPRESS_THRESHOLD_BYTES) {
+      bitmap.close();
+      return file;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      bitmap.close();
+      return file;
+    }
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/webp", WEBP_QUALITY)
+    );
+    // Keep the original when encoding fails or doesn't actually shrink it.
+    if (!blob || blob.size >= file.size) return file;
+    const baseName = file.name.replace(/\.[^.]+$/, "");
+    return new File([blob], `${baseName}.webp`, { type: "image/webp" });
+  } catch {
+    return file; // unreadable as an image — let the server-side validation decide
+  }
+}
+
 const ROLE_ORDER: ProductImageRole[] = ["framed", "print", "detail", "room"];
 
 const ROLE_HELP: Record<ProductImageRole, string> = {
@@ -56,13 +96,15 @@ export function ProductImageManager({
     const failures: string[] = [];
 
     for (const file of files) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
+      // Resize before the size check — a large original often shrinks under the cap.
+      const upload = await resizeForUpload(file);
+      if (upload.size > MAX_FILE_SIZE_BYTES) {
         failures.push(`${file.name}: Image must be 4MB or smaller.`);
         setUploadProgress((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
         continue;
       }
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", upload);
       const result = await uploadProductImage(productId, formData);
       if (result.error || !result.url) {
         failures.push(`${file.name}: ${result.error ?? "Upload failed"}`);
@@ -160,7 +202,13 @@ export function ProductImageManager({
             className="flex items-start gap-3 border border-hairline rounded-md p-2 bg-paper cursor-move"
           >
             <div className="relative w-14 h-14 flex-none">
-              <Image src={img.url} alt={img.alt || ""} fill className="object-cover rounded" />
+              <Image
+                src={img.url}
+                alt={img.alt || ""}
+                fill
+                sizes="56px"
+                className="object-cover rounded"
+              />
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-1.5">
               <select

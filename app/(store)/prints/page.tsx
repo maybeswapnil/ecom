@@ -4,6 +4,9 @@ import { PrintsGrid, type GridCard } from "@/components/store/PrintsGrid";
 import { ProductCard } from "@/components/store/ProductCard";
 import { BRAND_NAME, SITE_URL } from "@/lib/config";
 
+// ISR safety net — admin edits revalidate this path immediately; see home page.
+export const revalidate = 300;
+
 const PRINTS_DESCRIPTION =
   "Browse the full collection of limited-edition framed photographic prints, printed on archival paper and framed by hand.";
 

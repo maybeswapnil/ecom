@@ -5,6 +5,11 @@ import { getFeaturedProducts } from "@/lib/catalog";
 import { ProductCard } from "@/components/store/ProductCard";
 import { BRAND_NAME, SITE_URL, SOCIAL_LINKS } from "@/lib/config";
 
+// ISR safety net: serve the prerendered page from cache and regenerate at most
+// every 5 minutes. Admin edits revalidate the path immediately, so this only
+// covers drift (e.g. catalog changed directly in the database).
+export const revalidate = 300;
+
 const HOME_DESCRIPTION =
   "A small collection of limited-edition framed photographic prints from a decade spent wandering India and Europe. Archival paper, hand-framed, shipped ready to hang.";
 
@@ -148,7 +153,7 @@ export default async function HomePage() {
           <div className="flex-none w-[70%] md:w-[300px] max-w-[300px]">
             <div className="relative w-full aspect-[4/5] bg-image-placeholder">
               <Image
-                src="/images/about-portrait.png"
+                src="/images/about-portrait.jpg"
                 alt="Holding a freshly printed photograph of a Paris street corner"
                 fill
                 sizes="300px"

@@ -1,8 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { ProductReview } from "@/lib/types";
 
+// Cookie-less client: reviews render on the (statically cached) product page,
+// so this read must not touch cookies() or the page turns dynamic again.
 export async function getApprovedReviews(productId: string): Promise<ProductReview[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("product_reviews")
     .select("*")

@@ -1,9 +1,17 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ProductImage } from "@/lib/types";
+
+/** Storefront routes are statically cached (ISR) — revalidate them whenever
+ *  catalog data changes so shoppers see updates immediately. */
+function revalidateStorefront(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/prints");
+  if (slug) revalidatePath(`/prints/${slug}`);
+}
 
 export async function createProduct(input: {
   slug: string;
@@ -64,8 +72,7 @@ export async function updateProduct(
 
   if (error) return { error: error.message };
   revalidatePath(`/admin/products/${productId}`);
-  updateTag(`product:${product.slug}`);
-  updateTag("shop-grid");
+  revalidateStorefront(product.slug);
   return { ok: true };
 }
 
@@ -104,8 +111,7 @@ export async function deleteProduct(productId: string) {
   if (error) return { error: error.message };
 
   revalidatePath("/admin/products");
-  updateTag(`product:${product.slug}`);
-  updateTag("shop-grid");
+  revalidateStorefront(product.slug);
   return { ok: true };
 }
 
@@ -135,8 +141,7 @@ export async function setFeaturedProducts(productIds: string[]) {
   }
 
   revalidatePath("/admin/products");
-  revalidatePath("/");
-  updateTag("shop-grid");
+  revalidateStorefront();
   return { ok: true };
 }
 
@@ -156,8 +161,7 @@ export async function setProductStatus(productId: string, status: "draft" | "liv
 
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/admin/products");
-  updateTag(`product:${product.slug}`);
-  updateTag("shop-grid");
+  revalidateStorefront(product.slug);
   return { ok: true };
 }
 
@@ -176,7 +180,7 @@ export async function updateProductImages(productId: string, images: ProductImag
   if (error) return { error: error.message };
 
   revalidatePath(`/admin/products/${productId}`);
-  updateTag(`product:${product.slug}`);
+  revalidateStorefront(product.slug);
   return { ok: true };
 }
 
@@ -280,7 +284,7 @@ export async function upsertVariant(
     .select("slug")
     .eq("id", productId)
     .maybeSingle();
-  if (product) updateTag(`product:${product.slug}`);
+  if (product) revalidateStorefront(product.slug);
   revalidatePath(`/admin/products/${productId}`);
   return { ok: true };
 }

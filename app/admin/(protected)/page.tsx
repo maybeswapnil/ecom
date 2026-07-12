@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getDashboardData } from "@/lib/admin/dashboard";
+import { getTrafficOverview } from "@/lib/admin/posthog";
 import { formatPaise } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -15,8 +16,8 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default async function AdminDashboardPage() {
-  const { revenueToday, revenue7d, revenue30d, statusCounts, actionQueue, lowStock, alerts } =
-    await getDashboardData();
+  const [{ revenueToday, revenue7d, revenue30d, statusCounts, actionQueue, lowStock, alerts }, traffic] =
+    await Promise.all([getDashboardData(), getTrafficOverview()]);
 
   const hasAlerts =
     alerts.oversold.length > 0 ||
@@ -33,6 +34,60 @@ export default async function AdminDashboardPage() {
           <StatCard label="Revenue, 7 days" value={formatPaise(revenue7d)} />
           <StatCard label="Revenue, 30 days" value={formatPaise(revenue30d)} />
         </div>
+      </div>
+
+      <div className="border border-hairline bg-surface rounded-xl p-5">
+        <div className="text-sm font-semibold mb-4">Traffic (PostHog)</div>
+        {!traffic.configured ? (
+          <div className="text-sm text-muted">
+            PostHog read access isn&apos;t configured — set POSTHOG_PERSONAL_API_KEY and
+            POSTHOG_PROJECT_ID to enable this panel.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <div className="text-[11px] tracking-[0.12em] uppercase text-faint mb-1">
+                  Pageviews, 7d
+                </div>
+                <div className="font-display text-2xl font-medium">{traffic.pageviews7d}</div>
+              </div>
+              <div>
+                <div className="text-[11px] tracking-[0.12em] uppercase text-faint mb-1">
+                  Visitors, 7d
+                </div>
+                <div className="font-display text-2xl font-medium">{traffic.uniqueVisitors7d}</div>
+              </div>
+              <div>
+                <div className="text-[11px] tracking-[0.12em] uppercase text-faint mb-1">
+                  Pageviews, 30d
+                </div>
+                <div className="font-display text-2xl font-medium">{traffic.pageviews30d}</div>
+              </div>
+              <div>
+                <div className="text-[11px] tracking-[0.12em] uppercase text-faint mb-1">
+                  Visitors, 30d
+                </div>
+                <div className="font-display text-2xl font-medium">{traffic.uniqueVisitors30d}</div>
+              </div>
+            </div>
+            {traffic.topPages.length > 0 && (
+              <div>
+                <div className="text-[11px] tracking-[0.12em] uppercase text-faint mb-2">
+                  Top pages, 7d
+                </div>
+                <div className="flex flex-col gap-2">
+                  {traffic.topPages.map((p) => (
+                    <div key={p.path} className="flex justify-between text-sm">
+                      <span className="text-muted truncate">{p.path}</span>
+                      <span className="font-medium">{p.views}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {hasAlerts && (

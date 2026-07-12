@@ -1,4 +1,5 @@
-import { getCompanySettings, getHeroImageUrl } from "@/lib/company-settings";
+import { getCompanySettings, getHeroSettings } from "@/lib/company-settings";
+import { getLiveProducts } from "@/lib/catalog";
 import { CompanySettingsForm } from "@/components/admin/CompanySettingsForm";
 import { HeroImageForm } from "@/components/admin/HeroImageForm";
 import { TotpResetControl } from "@/components/admin/TotpResetControl";
@@ -6,7 +7,12 @@ import { TotpResetControl } from "@/components/admin/TotpResetControl";
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
-  const [settings, heroImageUrl] = await Promise.all([getCompanySettings(), getHeroImageUrl()]);
+  const [settings, hero, liveProducts] = await Promise.all([
+    getCompanySettings(),
+    getHeroSettings(),
+    getLiveProducts(),
+  ]);
+  const productOptions = liveProducts.map((p) => ({ id: p.id, title: p.title }));
 
   return (
     <div>
@@ -27,9 +33,14 @@ export default async function AdminSettingsPage() {
           </h2>
           <p className="text-sm text-muted mb-5">
             The large photo on the home page. Upload a new image and crop it to the 4:5 frame —
-            the preview below shows how it will sit in the hero section.
+            the preview below shows how it will sit in the hero section. Optionally link it to a
+            product so clicking the hero opens that product&rsquo;s page.
           </p>
-          <HeroImageForm currentUrl={heroImageUrl} />
+          <HeroImageForm
+            currentUrl={hero.imageUrl}
+            currentProductId={hero.productId}
+            products={productOptions}
+          />
         </div>
       </div>
       <TotpResetControl />

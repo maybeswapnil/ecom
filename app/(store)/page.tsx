@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getFeaturedProducts } from "@/lib/catalog";
-import { getHeroImageUrl } from "@/lib/company-settings";
+import { getHeroSettings } from "@/lib/company-settings";
 import { ProductCard } from "@/components/store/ProductCard";
 import { BRAND_NAME, DEFAULT_HERO_IMAGE, SITE_URL, SOCIAL_LINKS } from "@/lib/config";
 
@@ -33,7 +33,19 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [featured, heroImageUrl] = await Promise.all([getFeaturedProducts(), getHeroImageUrl()]);
+  const [featured, hero] = await Promise.all([getFeaturedProducts(), getHeroSettings()]);
+  const heroImage = (
+    <div className="relative w-full aspect-[4/5] bg-image-placeholder shadow-[0_30px_60px_-38px_rgba(28,25,21,0.5)]">
+      <Image
+        src={hero.imageUrl || DEFAULT_HERO_IMAGE}
+        alt="A framed print of a mountain range, held up in a sunlit room"
+        fill
+        priority
+        sizes="(max-width: 768px) 100vw, 440px"
+        className="object-cover object-bottom"
+      />
+    </div>
+  );
 
   const jsonLd = [
     {
@@ -89,16 +101,13 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="flex-[1_1_44%] w-full max-w-[440px]">
-          <div className="relative w-full aspect-[4/5] bg-image-placeholder shadow-[0_30px_60px_-38px_rgba(28,25,21,0.5)]">
-            <Image
-              src={heroImageUrl || DEFAULT_HERO_IMAGE}
-              alt="A framed print of a mountain range, held up in a sunlit room"
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 440px"
-              className="object-cover object-bottom"
-            />
-          </div>
+          {hero.productSlug ? (
+            <Link href={`/prints/${hero.productSlug}`} aria-label="View this print" className="block">
+              {heroImage}
+            </Link>
+          ) : (
+            heroImage
+          )}
           <div className="flex justify-between items-baseline mt-4.5 px-0.5">
             <span className="font-display italic text-base text-muted">
               Framed and ready to hang

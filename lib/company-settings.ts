@@ -28,18 +28,32 @@ export function companySettingsAddressLines(settings: CompanySettings): string[]
   return [settings.addressLine1, settings.addressLine2, cityLine].filter(Boolean);
 }
 
-/** Home-page hero image URL — empty string means "use the bundled default".
- *  Kept separate from getCompanySettings so a failure here (e.g. migration not
- *  yet applied) can't degrade the invoice/email company details. */
-export async function getHeroImageUrl(): Promise<string> {
+export type HeroSettings = {
+  /** Empty string means "use the bundled default image". */
+  imageUrl: string;
+  productId: string | null;
+  /** Slug to link the hero to — null when unset or the product isn't live. */
+  productSlug: string | null;
+};
+
+/** Home-page hero image + optional product link. Kept separate from
+ *  getCompanySettings so a failure here (e.g. migration not yet applied)
+ *  can't degrade the invoice/email company details. */
+export async function getHeroSettings(): Promise<HeroSettings> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("company_settings")
-    .select("hero_image_url")
+    .select("hero_image_url, hero_product_id, hero_product:products(slug, status)")
     .eq("id", 1)
     .maybeSingle();
 
-  return data?.hero_image_url ?? "";
+  const product = (data?.hero_product as unknown as { slug: string; status: string } | null) ?? null;
+  return {
+    imageUrl: data?.hero_image_url ?? "",
+    productId: data?.hero_product_id ?? null,
+    // Only link to live products — a draft/archived target would 404 for shoppers.
+    productSlug: product && product.status === "live" ? product.slug : null,
+  };
 }
 
 export async function getCompanySettings(): Promise<CompanySettings> {

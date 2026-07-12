@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { updateHeroImage, resetHeroImage } from "@/lib/admin/hero-actions";
+import { updateHeroImage, updateHeroProduct, resetHeroImage } from "@/lib/admin/hero-actions";
 import { DEFAULT_HERO_IMAGE } from "@/lib/config";
+
+export type HeroProductOption = { id: string; title: string };
 
 // The home hero renders this image at 440px wide (aspect 4/5) — 1200×1500
 // covers ~2.7× DPR with headroom, and next/image downscales from there.
@@ -72,8 +74,16 @@ function HeroWireframe({ imgSrc }: { imgSrc: string }) {
   );
 }
 
-export function HeroImageForm({ currentUrl }: { currentUrl: string }) {
+type HeroImageFormProps = {
+  currentUrl: string;
+  currentProductId: string | null;
+  products: HeroProductOption[];
+};
+
+export function HeroImageForm({ currentUrl, currentProductId, products }: HeroImageFormProps) {
   const router = useRouter();
+  const [productId, setProductId] = useState(currentProductId ?? "");
+  const [linkStatus, setLinkStatus] = useState<string | null>(null);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -135,6 +145,22 @@ export function HeroImageForm({ currentUrl }: { currentUrl: string }) {
     URL.revokeObjectURL(pending.previewUrl);
     setPending(null);
     setSuccess("Hero image updated — it's live on the home page.");
+    router.refresh();
+  }
+
+  async function handleProductChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const nextId = e.target.value;
+    const previousId = productId;
+    setProductId(nextId);
+    setLinkStatus(null);
+
+    const result = await updateHeroProduct(nextId || null);
+    if (result.error) {
+      setProductId(previousId);
+      setLinkStatus(result.error);
+      return;
+    }
+    setLinkStatus(nextId ? "Saved — the hero now links to this product." : "Saved — hero is not clickable.");
     router.refresh();
   }
 
@@ -211,6 +237,25 @@ export function HeroImageForm({ currentUrl }: { currentUrl: string }) {
               This is a preview — the change isn&rsquo;t live until you save.
             </div>
           )}
+
+          <label className="block">
+            <span className="text-[11px] tracking-[0.1em] uppercase text-faint block mb-1.5">
+              Clicking the hero opens
+            </span>
+            <select
+              value={productId}
+              onChange={handleProductChange}
+              className="w-full h-10 px-2.5 text-sm border border-border-input rounded-md bg-paper text-ink"
+            >
+              <option value="">No link (not clickable)</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          {linkStatus && <div className="text-[12.5px] text-muted">{linkStatus}</div>}
           {error && <div className="text-[13px] text-red-700">{error}</div>}
           {success && !pending && <div className="text-[13px] text-accent-green">{success}</div>}
 

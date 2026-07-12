@@ -76,6 +76,22 @@ export async function updateHeroImage(formData: FormData) {
   return { ok: true, url: publicUrl };
 }
 
+/** Set (or clear, with null) the product the home-page hero links to. */
+export async function updateHeroProduct(productId: string | null) {
+  await requireAdmin();
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("company_settings")
+    .update({ hero_product_id: productId, updated_at: new Date().toISOString() })
+    .eq("id", 1);
+  if (error) return { error: "Failed to save hero link. Please try again." };
+
+  revalidatePath("/");
+  revalidatePath("/admin/settings");
+  return { ok: true };
+}
+
 /** Revert the home page to the bundled default hero image. */
 export async function resetHeroImage() {
   await requireAdmin();
